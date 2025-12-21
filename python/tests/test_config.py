@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from pwndoc_mcp_server.config import (
-    PwnDocConfig,
+    Config,
     load_config,
     save_config,
     get_config_path,
@@ -18,12 +18,12 @@ from pwndoc_mcp_server.config import (
 )
 
 
-class TestPwnDocConfig:
-    """Tests for PwnDocConfig dataclass."""
+class TestConfig:
+    """Tests for Config dataclass."""
     
     def test_default_values(self):
         """Test default configuration values."""
-        config = PwnDocConfig()
+        config = Config()
         
         assert config.url == ""
         assert config.username == ""
@@ -37,7 +37,7 @@ class TestPwnDocConfig:
     
     def test_custom_values(self):
         """Test configuration with custom values."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com",
             username="admin",
             password="secret123",
@@ -57,7 +57,7 @@ class TestPwnDocConfig:
     
     def test_is_valid_with_token(self):
         """Test config validation with token."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com",
             token="jwt-token-here"
         )
@@ -65,7 +65,7 @@ class TestPwnDocConfig:
     
     def test_is_valid_with_credentials(self):
         """Test config validation with username/password."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com",
             username="admin",
             password="secret"
@@ -74,7 +74,7 @@ class TestPwnDocConfig:
     
     def test_is_invalid_no_url(self):
         """Test config validation without URL."""
-        config = PwnDocConfig(
+        config = Config(
             username="admin",
             password="secret"
         )
@@ -82,14 +82,14 @@ class TestPwnDocConfig:
     
     def test_is_invalid_no_auth(self):
         """Test config validation without auth."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com"
         )
         assert config.is_valid() is False
     
     def test_to_dict(self):
         """Test conversion to dictionary."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com",
             username="admin"
         )
@@ -102,7 +102,7 @@ class TestPwnDocConfig:
     
     def test_to_dict_exclude_secrets(self):
         """Test conversion to dict excluding secrets."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.example.com",
             username="admin",
             password="secret",
@@ -227,7 +227,7 @@ class TestSaveConfig:
     
     def test_save_yaml_config(self, temp_dir):
         """Test saving config to YAML file."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://save.pwndoc.com",
             username="saveuser",
             password="savepass"
@@ -246,7 +246,7 @@ class TestSaveConfig:
     
     def test_save_json_config(self, temp_dir):
         """Test saving config to JSON file."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://save.pwndoc.com",
             username="saveuser"
         )
@@ -263,7 +263,7 @@ class TestSaveConfig:
     
     def test_save_creates_directory(self, temp_dir):
         """Test that save creates parent directories."""
-        config = PwnDocConfig(url="https://test.com")
+        config = Config(url="https://test.com")
         
         nested_path = os.path.join(temp_dir, "nested", "dir", "config.yaml")
         save_config(config, nested_path)
@@ -272,7 +272,7 @@ class TestSaveConfig:
     
     def test_save_file_permissions(self, temp_dir):
         """Test that saved config has secure permissions."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://test.com",
             password="secret"
         )

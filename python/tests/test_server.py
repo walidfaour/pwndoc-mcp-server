@@ -11,7 +11,7 @@ from pwndoc_mcp_server.server import (
     create_server,
     TOOL_DEFINITIONS,
 )
-from pwndoc_mcp_server.config import PwnDocConfig
+from pwndoc_mcp_server.config import Config
 
 
 class TestToolDefinitions:
@@ -95,7 +95,7 @@ class TestPwnDocMCPServer:
     @pytest.fixture
     def config(self):
         """Create test configuration."""
-        return PwnDocConfig(
+        return Config(
             url="https://pwndoc.test.com",
             token="test-jwt-token"
         )
@@ -207,7 +207,7 @@ class TestCreateServer:
     
     def test_create_server_with_config(self):
         """Test creating server with config object."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -229,7 +229,7 @@ class TestCreateServer:
     
     def test_create_server_invalid_config(self):
         """Test creating server with invalid config raises error."""
-        config = PwnDocConfig()  # Empty config
+        config = Config()  # Empty config
         
         with pytest.raises(ValueError, match="Invalid configuration"):
             create_server(config)
@@ -241,7 +241,7 @@ class TestToolResultFormatting:
     @pytest.fixture
     def server(self):
         """Create test server."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -285,7 +285,7 @@ class TestServerTransports:
     @pytest.fixture
     def config(self):
         """Create test configuration."""
-        return PwnDocConfig(
+        return Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -314,7 +314,7 @@ class TestServerProtocol:
     @pytest.fixture
     def server(self):
         """Create test server."""
-        config = PwnDocConfig(
+        config = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
