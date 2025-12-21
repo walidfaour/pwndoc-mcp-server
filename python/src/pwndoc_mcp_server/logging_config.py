@@ -99,6 +99,39 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(log_obj)
 
 
+class SafeStreamHandler(logging.StreamHandler):
+    """StreamHandler that handles Unicode encoding errors gracefully on Windows."""
+
+    def emit(self, record):
+        """Emit a record, handling Unicode encoding errors."""
+        try:
+            super().emit(record)
+        except UnicodeEncodeError:
+            # If we get an encoding error, try to encode with 'replace' errors
+            try:
+                msg = self.format(record)
+                stream = self.stream
+                # Encode with errors='replace' to substitute unmappable characters
+                if hasattr(stream, "encoding") and stream.encoding:
+                    # Encode and decode with replace to substitute unmappable chars
+                    safe_msg = msg.encode(stream.encoding, errors="replace").decode(
+                        stream.encoding, errors="replace"
+                    )
+                    stream.write(safe_msg)
+                    stream.write(self.terminator)
+                    self.flush()
+                else:
+                    # If no encoding info, try with utf-8
+                    safe_msg = msg.encode("utf-8", errors="replace").decode(
+                        "utf-8", errors="replace"
+                    )
+                    stream.write(safe_msg)
+                    stream.write(self.terminator)
+                    self.flush()
+            except Exception:
+                self.handleError(record)
+
+
 class PerformanceLogger:
     """Logger for performance metrics."""
 
@@ -197,15 +230,9 @@ def setup_logging(
 
     # Console handler (if enabled)
     if console:
-        # On Windows, wrap stderr with UTF-8 encoding to handle Unicode
+        # On Windows, use SafeStreamHandler to handle Unicode encoding errors
         if sys.platform == "win32":
-            import io
-
-            # Wrap stderr with UTF-8 encoding and error handling
-            stderr_stream = io.TextIOWrapper(
-                sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
-            )
-            console_handler = logging.StreamHandler(stderr_stream)
+            console_handler = SafeStreamHandler(sys.stderr)
         else:
             console_handler = logging.StreamHandler(sys.stderr)
         console_handler.setFormatter(formatter)
