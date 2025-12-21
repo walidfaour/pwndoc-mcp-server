@@ -258,10 +258,10 @@ docker run -it --rm \
 - **Repository docs**: [docs/](./docs/)
 
 Quick links:
-- [Getting Started Guide](https://walidfaour.github.io/pwndoc-mcp-server/getting-started)
-- [Configuration Reference](https://walidfaour.github.io/pwndoc-mcp-server/configuration)
-- [Tool Reference](https://walidfaour.github.io/pwndoc-mcp-server/tools)
-- [Docker Deployment](https://walidfaour.github.io/pwndoc-mcp-server/docker)
+- [Getting Started Guide](https://walidfaour.github.io/pwndoc-mcp-server/getting-started/quick-start)
+- [Configuration Reference](https://walidfaour.github.io/pwndoc-mcp-server/getting-started/configuration)
+- [Tool Reference](https://walidfaour.github.io/pwndoc-mcp-server/tools/overview)
+- [Docker Deployment](https://walidfaour.github.io/pwndoc-mcp-server/user-guide/docker)
 
 ## 📁 Project Structure
 
