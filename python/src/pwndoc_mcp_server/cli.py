@@ -13,27 +13,27 @@ Usage:
     pwndoc-mcp version                 # Show version
 """
 
-import sys
 import json
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
 
 try:
     import typer
     from rich.console import Console
-    from rich.table import Table
     from rich.panel import Panel
     from rich.syntax import Syntax
+    from rich.table import Table
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
     typer = None
 
 from . import __version__
-from .config import Config, load_config, save_config, init_config_interactive, DEFAULT_CONFIG_FILE
-from .server import PwnDocMCPServer
 from .client import PwnDocClient, PwnDocError
+from .config import DEFAULT_CONFIG_FILE, Config, init_config_interactive, load_config, save_config
+from .server import PwnDocMCPServer
 
 # Create CLI app
 if HAS_RICH:

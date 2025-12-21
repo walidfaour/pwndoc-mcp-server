@@ -13,9 +13,9 @@ __author__ = "Faour"
 __email__ = "faour@finessedirect.com"
 __license__ = "MIT"
 
-from .server import PwnDocMCPServer
-from .config import Config, load_config
 from .client import PwnDocClient
+from .config import Config, load_config
+from .server import PwnDocMCPServer
 
 __all__ = [
     "PwnDocMCPServer",

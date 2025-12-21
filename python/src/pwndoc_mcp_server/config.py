@@ -18,12 +18,12 @@ Environment Variables:
     PWNDOC_LOG_FILE     - Path to log file (optional)
 """
 
-import os
 import json
 import logging
-from pathlib import Path
+import os
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 import yaml
 
