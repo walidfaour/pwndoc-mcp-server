@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 WORKDIR /app
 
 # Install dependencies
-COPY pyproject.toml .
+COPY pyproject.toml README.md ./
 RUN pip install --no-cache-dir .
 
 # Copy source
