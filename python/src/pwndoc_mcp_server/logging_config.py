@@ -197,7 +197,17 @@ def setup_logging(
 
     # Console handler (if enabled)
     if console:
-        console_handler = logging.StreamHandler(sys.stderr)
+        # On Windows, wrap stderr with UTF-8 encoding to handle Unicode
+        if sys.platform == "win32":
+            import io
+
+            # Wrap stderr with UTF-8 encoding and error handling
+            stderr_stream = io.TextIOWrapper(
+                sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
+            )
+            console_handler = logging.StreamHandler(stderr_stream)
+        else:
+            console_handler = logging.StreamHandler(sys.stderr)
         console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
 
@@ -210,11 +220,12 @@ def setup_logging(
         if max_bytes is None:
             max_bytes = max_size_mb * 1024 * 1024
 
-        # Use rotating file handler
+        # Use rotating file handler with UTF-8 encoding
         file_handler = logging.handlers.RotatingFileHandler(
             log_path,
             maxBytes=max_bytes,
             backupCount=backup_count,
+            encoding="utf-8",
         )
 
         # Always use non-colored formatter for files
