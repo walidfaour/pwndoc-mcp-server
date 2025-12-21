@@ -264,6 +264,31 @@ class PwnDocMCPServer:
             handler=self._handle_update_review_status,
         )
 
+        self._register_tool(
+            name="get_audit_sections",
+            description="Get audit sections content.",
+            parameters={
+                "type": "object",
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
+            },
+            handler=self._handle_get_audit_sections,
+        )
+
+        self._register_tool(
+            name="update_audit_sections",
+            description="Update audit sections content.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "The audit ID"},
+                    "sections": {"type": "object", "description": "Sections data to update"},
+                },
+                "required": ["audit_id", "sections"],
+            },
+            handler=self._handle_update_audit_sections,
+        )
+
         # =====================================================================
         # FINDING TOOLS
         # =====================================================================
@@ -671,6 +696,27 @@ class PwnDocMCPServer:
             handler=self._handle_create_vulnerability_from_finding,
         )
 
+        self._register_tool(
+            name="get_vulnerability_updates",
+            description="Get available vulnerability template updates.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_get_vulnerability_updates,
+        )
+
+        self._register_tool(
+            name="merge_vulnerability",
+            description="Merge vulnerability template with an update.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_id": {"type": "string", "description": "Vulnerability template ID"},
+                    "update_id": {"type": "string", "description": "Update ID to merge"},
+                },
+                "required": ["vuln_id", "update_id"],
+            },
+            handler=self._handle_merge_vulnerability,
+        )
+
         # =====================================================================
         # USER TOOLS
         # =====================================================================
@@ -756,6 +802,33 @@ class PwnDocMCPServer:
             description="List all users with reviewer role.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_reviewers,
+        )
+
+        self._register_tool(
+            name="get_totp_status",
+            description="Get TOTP (2FA) status for current user.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_get_totp,
+        )
+
+        self._register_tool(
+            name="setup_totp",
+            description="Setup TOTP (2FA) for current user.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_setup_totp,
+        )
+
+        self._register_tool(
+            name="disable_totp",
+            description="Disable TOTP (2FA) for current user.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "token": {"type": "string", "description": "TOTP token for verification"}
+                },
+                "required": ["token"],
+            },
+            handler=self._handle_disable_totp,
         )
 
         # =====================================================================
@@ -858,10 +931,70 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="export_settings",
+            description="Export all system settings.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_export_settings,
+        )
+
+        self._register_tool(
+            name="import_settings",
+            description="Import/revert system settings from export.",
+            parameters={
+                "type": "object",
+                "properties": {"settings": {"type": "object", "description": "Settings to import"}},
+                "required": ["settings"],
+            },
+            handler=self._handle_import_settings,
+        )
+
+        self._register_tool(
             name="list_languages",
             description="List all configured languages.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_languages,
+        )
+
+        self._register_tool(
+            name="create_language",
+            description="Create a new language.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "language": {"type": "string", "description": "Language code (e.g., 'en')"},
+                    "name": {"type": "string", "description": "Language name"},
+                },
+                "required": ["language", "name"],
+            },
+            handler=self._handle_create_language,
+        )
+
+        self._register_tool(
+            name="update_language",
+            description="Update a language.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "language_id": {"type": "string", "description": "Language ID"},
+                    "language": {"type": "string", "description": "Language code"},
+                    "name": {"type": "string", "description": "Language name"},
+                },
+                "required": ["language_id"],
+            },
+            handler=self._handle_update_language,
+        )
+
+        self._register_tool(
+            name="delete_language",
+            description="Delete a language.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "language_id": {"type": "string", "description": "Language ID to delete"}
+                },
+                "required": ["language_id"],
+            },
+            handler=self._handle_delete_language,
         )
 
         self._register_tool(
@@ -872,10 +1005,99 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="create_audit_type",
+            description="Create a new audit type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Audit type name"},
+                    "templates": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Template IDs",
+                    },
+                },
+                "required": ["name"],
+            },
+            handler=self._handle_create_audit_type,
+        )
+
+        self._register_tool(
+            name="update_audit_type",
+            description="Update an audit type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_type_id": {"type": "string", "description": "Audit type ID"},
+                    "name": {"type": "string", "description": "Audit type name"},
+                    "templates": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["audit_type_id"],
+            },
+            handler=self._handle_update_audit_type,
+        )
+
+        self._register_tool(
+            name="delete_audit_type",
+            description="Delete an audit type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_type_id": {"type": "string", "description": "Audit type ID to delete"}
+                },
+                "required": ["audit_type_id"],
+            },
+            handler=self._handle_delete_audit_type,
+        )
+
+        self._register_tool(
             name="list_vulnerability_types",
             description="List all vulnerability types.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_vulnerability_types,
+        )
+
+        self._register_tool(
+            name="create_vulnerability_type",
+            description="Create a new vulnerability type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Vulnerability type name"}
+                },
+                "required": ["name"],
+            },
+            handler=self._handle_create_vulnerability_type,
+        )
+
+        self._register_tool(
+            name="update_vulnerability_type",
+            description="Update a vulnerability type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_type_id": {"type": "string", "description": "Vulnerability type ID"},
+                    "name": {"type": "string", "description": "Vulnerability type name"},
+                },
+                "required": ["vuln_type_id"],
+            },
+            handler=self._handle_update_vulnerability_type,
+        )
+
+        self._register_tool(
+            name="delete_vulnerability_type",
+            description="Delete a vulnerability type.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_type_id": {
+                        "type": "string",
+                        "description": "Vulnerability type ID to delete",
+                    }
+                },
+                "required": ["vuln_type_id"],
+            },
+            handler=self._handle_delete_vulnerability_type,
         )
 
         self._register_tool(
@@ -886,6 +1108,44 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="create_vulnerability_category",
+            description="Create a new vulnerability category.",
+            parameters={
+                "type": "object",
+                "properties": {"name": {"type": "string", "description": "Category name"}},
+                "required": ["name"],
+            },
+            handler=self._handle_create_vulnerability_category,
+        )
+
+        self._register_tool(
+            name="update_vulnerability_category",
+            description="Update a vulnerability category.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "category_id": {"type": "string", "description": "Category ID"},
+                    "name": {"type": "string", "description": "Category name"},
+                },
+                "required": ["category_id"],
+            },
+            handler=self._handle_update_vulnerability_category,
+        )
+
+        self._register_tool(
+            name="delete_vulnerability_category",
+            description="Delete a vulnerability category.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "category_id": {"type": "string", "description": "Category ID to delete"}
+                },
+                "required": ["category_id"],
+            },
+            handler=self._handle_delete_vulnerability_category,
+        )
+
+        self._register_tool(
             name="list_sections",
             description="List all section definitions.",
             parameters={"type": "object", "properties": {}},
@@ -893,10 +1153,97 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="create_section",
+            description="Create a new section definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "field": {"type": "string", "description": "Section field name"},
+                    "name": {"type": "string", "description": "Section display name"},
+                },
+                "required": ["field", "name"],
+            },
+            handler=self._handle_create_section,
+        )
+
+        self._register_tool(
+            name="update_section",
+            description="Update a section definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "section_id": {"type": "string", "description": "Section ID"},
+                    "field": {"type": "string", "description": "Section field name"},
+                    "name": {"type": "string", "description": "Section display name"},
+                },
+                "required": ["section_id"],
+            },
+            handler=self._handle_update_section,
+        )
+
+        self._register_tool(
+            name="delete_section",
+            description="Delete a section definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "section_id": {"type": "string", "description": "Section ID to delete"}
+                },
+                "required": ["section_id"],
+            },
+            handler=self._handle_delete_section,
+        )
+
+        self._register_tool(
             name="list_custom_fields",
             description="List all custom field definitions.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_custom_fields,
+        )
+
+        self._register_tool(
+            name="create_custom_field",
+            description="Create a new custom field definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string", "description": "Field label"},
+                    "field_type": {
+                        "type": "string",
+                        "description": "Field type (text, select, etc.)",
+                    },
+                },
+                "required": ["label", "field_type"],
+            },
+            handler=self._handle_create_custom_field,
+        )
+
+        self._register_tool(
+            name="update_custom_field",
+            description="Update a custom field definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "field_id": {"type": "string", "description": "Custom field ID"},
+                    "label": {"type": "string", "description": "Field label"},
+                    "field_type": {"type": "string", "description": "Field type"},
+                },
+                "required": ["field_id"],
+            },
+            handler=self._handle_update_custom_field,
+        )
+
+        self._register_tool(
+            name="delete_custom_field",
+            description="Delete a custom field definition.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "field_id": {"type": "string", "description": "Custom field ID to delete"}
+                },
+                "required": ["field_id"],
+            },
+            handler=self._handle_delete_custom_field,
         )
 
         self._register_tool(
@@ -1204,6 +1551,103 @@ class PwnDocMCPServer:
     def _handle_delete_image(self, image_id: str) -> Dict:
         self.client.delete_image(image_id)
         return {"success": True, "message": f"Image {image_id} deleted"}
+
+    # Audit section handlers
+    def _handle_get_audit_sections(self, audit_id: str) -> Dict:
+        return self.client.get_audit_sections(audit_id)
+
+    def _handle_update_audit_sections(self, audit_id: str, sections: Dict) -> Dict:
+        return self.client.update_audit_sections(audit_id, sections)
+
+    # TOTP handlers
+    def _handle_get_totp(self) -> Dict:
+        return self.client.get_totp()
+
+    def _handle_setup_totp(self) -> Dict:
+        return self.client.setup_totp()
+
+    def _handle_disable_totp(self, token: str) -> Dict:
+        return self.client.disable_totp(token)
+
+    # Settings handlers
+    def _handle_export_settings(self) -> Dict:
+        return self.client.export_settings()
+
+    def _handle_import_settings(self, settings: Dict) -> Dict:
+        return self.client.import_settings(settings)
+
+    # Language handlers
+    def _handle_create_language(self, **kwargs) -> Dict:
+        return self.client.create_language(**kwargs)
+
+    def _handle_update_language(self, language_id: str, **kwargs) -> Dict:
+        return self.client.update_language(language_id, **kwargs)
+
+    def _handle_delete_language(self, language_id: str) -> Dict:
+        self.client.delete_language(language_id)
+        return {"success": True, "message": f"Language {language_id} deleted"}
+
+    # Audit type handlers
+    def _handle_create_audit_type(self, **kwargs) -> Dict:
+        return self.client.create_audit_type(**kwargs)
+
+    def _handle_update_audit_type(self, audit_type_id: str, **kwargs) -> Dict:
+        return self.client.update_audit_type(audit_type_id, **kwargs)
+
+    def _handle_delete_audit_type(self, audit_type_id: str) -> Dict:
+        self.client.delete_audit_type(audit_type_id)
+        return {"success": True, "message": f"Audit type {audit_type_id} deleted"}
+
+    # Vulnerability type handlers
+    def _handle_create_vulnerability_type(self, **kwargs) -> Dict:
+        return self.client.create_vulnerability_type(**kwargs)
+
+    def _handle_update_vulnerability_type(self, vuln_type_id: str, **kwargs) -> Dict:
+        return self.client.update_vulnerability_type(vuln_type_id, **kwargs)
+
+    def _handle_delete_vulnerability_type(self, vuln_type_id: str) -> Dict:
+        self.client.delete_vulnerability_type(vuln_type_id)
+        return {"success": True, "message": f"Vulnerability type {vuln_type_id} deleted"}
+
+    # Vulnerability category handlers
+    def _handle_create_vulnerability_category(self, **kwargs) -> Dict:
+        return self.client.create_vulnerability_category(**kwargs)
+
+    def _handle_update_vulnerability_category(self, category_id: str, **kwargs) -> Dict:
+        return self.client.update_vulnerability_category(category_id, **kwargs)
+
+    def _handle_delete_vulnerability_category(self, category_id: str) -> Dict:
+        self.client.delete_vulnerability_category(category_id)
+        return {"success": True, "message": f"Vulnerability category {category_id} deleted"}
+
+    # Section handlers
+    def _handle_create_section(self, **kwargs) -> Dict:
+        return self.client.create_section(**kwargs)
+
+    def _handle_update_section(self, section_id: str, **kwargs) -> Dict:
+        return self.client.update_section(section_id, **kwargs)
+
+    def _handle_delete_section(self, section_id: str) -> Dict:
+        self.client.delete_section(section_id)
+        return {"success": True, "message": f"Section {section_id} deleted"}
+
+    # Custom field handlers
+    def _handle_create_custom_field(self, **kwargs) -> Dict:
+        return self.client.create_custom_field(**kwargs)
+
+    def _handle_update_custom_field(self, field_id: str, **kwargs) -> Dict:
+        return self.client.update_custom_field(field_id, **kwargs)
+
+    def _handle_delete_custom_field(self, field_id: str) -> Dict:
+        self.client.delete_custom_field(field_id)
+        return {"success": True, "message": f"Custom field {field_id} deleted"}
+
+    # Vulnerability update handlers
+    def _handle_get_vulnerability_updates(self) -> List[Dict]:
+        return self.client.get_vulnerability_updates()
+
+    def _handle_merge_vulnerability(self, vuln_id: str, update_id: str) -> Dict:
+        return self.client.merge_vulnerability(vuln_id, update_id)
 
     # =========================================================================
     # PUBLIC API METHODS (for testing and direct use)
