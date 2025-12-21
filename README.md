@@ -284,6 +284,84 @@ pwndoc-mcp claude-status    # Check installation status
 pwndoc-mcp claude-uninstall # Remove MCP config
 ```
 
+### Using with Other MCP Clients
+
+The server works with **any MCP-compatible client**, not just Claude Desktop:
+
+**stdio transport (default)** - For client integrations:
+```bash
+pwndoc-mcp serve  # Communicates via stdin/stdout
+```
+
+**SSE transport** - For web-based clients:
+```bash
+pwndoc-mcp serve --transport sse --host 0.0.0.0 --port 8080
+# Access at: http://localhost:8080/mcp
+```
+
+**Client configuration examples:**
+
+<details>
+<summary><b>Cline (VS Code)</b></summary>
+
+Add to Cline MCP settings:
+```json
+{
+  "mcpServers": {
+    "pwndoc": {
+      "command": "pwndoc-mcp",
+      "args": ["serve"],
+      "env": {
+        "PWNDOC_URL": "https://pwndoc.example.com",
+        "PWNDOC_USERNAME": "your-username",
+        "PWNDOC_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Continue.dev</b></summary>
+
+Add to Continue config:
+```json
+{
+  "mcpServers": {
+    "pwndoc": {
+      "command": "pwndoc-mcp",
+      "args": ["serve"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Custom MCP Client</b></summary>
+
+Connect to stdio transport:
+```python
+import subprocess
+process = subprocess.Popen(
+    ["pwndoc-mcp", "serve"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    env={"PWNDOC_URL": "...", "PWNDOC_USERNAME": "...", "PWNDOC_PASSWORD": "..."}
+)
+```
+
+Or use SSE transport:
+```python
+import requests
+response = requests.post(
+    "http://localhost:8080/mcp",
+    json={"method": "tools/list"}
+)
+```
+</details>
+
 ### Docker
 
 ```bash

@@ -40,6 +40,47 @@ def get_claude_config_path() -> Path:
         raise RuntimeError(f"Unsupported platform: {system}")
 
 
+def is_claude_installed() -> bool:
+    """
+    Check if Claude Desktop appears to be installed.
+
+    Returns:
+        True if Claude Desktop installation is detected
+    """
+    system = platform.system()
+
+    if system == "Linux":
+        # Check for Claude Desktop in common locations
+        claude_paths = [
+            Path.home() / ".local" / "share" / "applications" / "claude.desktop",
+            Path("/usr/share/applications/claude.desktop"),
+            Path.home() / ".config" / "claude",  # Config dir exists
+        ]
+        return any(p.exists() for p in claude_paths)
+
+    elif system == "Darwin":  # macOS
+        # Check for Claude.app in Applications
+        app_paths = [
+            Path("/Applications/Claude.app"),
+            Path.home() / "Applications" / "Claude.app",
+            Path.home() / "Library" / "Application Support" / "Claude",  # Config dir
+        ]
+        return any(p.exists() for p in app_paths)
+
+    elif system == "Windows":
+        # Check for Claude in Program Files or AppData
+        appdata = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+        local_appdata = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+        claude_paths = [
+            Path(os.environ.get("PROGRAMFILES", "C:\\Program Files")) / "Claude",
+            local_appdata / "Programs" / "Claude",
+            appdata / "Claude",  # Config dir
+        ]
+        return any(p.exists() for p in claude_paths)
+
+    return False
+
+
 def detect_python_executable() -> str:
     """
     Detect the Python executable being used.

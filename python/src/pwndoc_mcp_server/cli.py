@@ -44,6 +44,7 @@ from pwndoc_mcp_server.config import (
 from pwndoc_mcp_server.mcp_installer import (
     get_claude_config_path,
     install_mcp_config,
+    is_claude_installed,
     show_mcp_config,
     uninstall_mcp_config,
 )
@@ -412,10 +413,26 @@ if HAS_RICH:
     def claude_install(
         force: bool = typer.Option(False, "--force", "-f", help="Overwrite existing configuration"),
         env_file: Optional[str] = typer.Option(None, "--env-file", help="Path to .env file with credentials"),
+        skip_check: bool = typer.Option(False, "--skip-check", help="Skip Claude Desktop installation check"),
     ):
         """Install PwnDoc MCP server for Claude Desktop."""
         try:
             console.print("\n[cyan]Installing PwnDoc MCP for Claude Desktop...[/cyan]\n")
+
+            # Check if Claude Desktop is installed
+            if not skip_check and not is_claude_installed():
+                console.print("[yellow]⚠ Claude Desktop does not appear to be installed.[/yellow]\n")
+                console.print("The configuration will be created, but Claude Desktop won't use it until installed.\n")
+                console.print("To use with other MCP clients, see: [cyan]pwndoc-mcp serve --help[/cyan]\n")
+
+                proceed = Prompt.ask(
+                    "Continue anyway?",
+                    choices=["y", "n"],
+                    default="n"
+                )
+                if proceed.lower() != "y":
+                    console.print("[yellow]Installation cancelled[/yellow]")
+                    raise typer.Exit(0)
 
             # Build environment variables from config if needed
             env_vars = {}
@@ -439,7 +456,8 @@ if HAS_RICH:
                     f"Config file: [cyan]{config_path}[/cyan]\n\n"
                     f"[yellow]Next steps:[/yellow]\n"
                     f"1. Restart Claude Desktop\n"
-                    f"2. PwnDoc tools will be available in Claude",
+                    f"2. PwnDoc tools will be available in Claude\n\n"
+                    f"[dim]For other MCP clients: pwndoc-mcp serve[/dim]",
                     title="Installation Complete",
                     border_style="green"
                 ))
