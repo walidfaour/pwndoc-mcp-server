@@ -85,6 +85,72 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Enforce version sync from release tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "Running bump_version to enforce ${TAG_VERSION}"
+          python python/scripts/bump_version.py --version "${TAG_VERSION}"
+          if ! git diff --quiet; then
+            echo "::error::Version files were not up to date for tag v${TAG_VERSION}. Commit the changes from python/scripts/bump_version.py and re-run the release."
+            git diff --stat
+            git diff
+            exit 1
+          fi
+
+      - name: Validate tag version matches project metadata
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: .
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import sys
+          import tomllib
+
+          tag = "${GITHUB_REF}".removeprefix("refs/tags/v")
+
+          with open("python/pyproject.toml", "rb") as f:
+              pyproject = tomllib.load(f)
+          project_version = pyproject["project"]["version"]
+
+          def read_pattern(path: str, pattern: str) -> str:
+              text = Path(path).read_text(encoding="utf-8")
+              match = re.search(pattern, text)
+              if not match:
+                  raise SystemExit(f"Pattern not found in {path}: {pattern}")
+              return match.group(1)
+
+          from pathlib import Path
+
+          fallback_version = read_pattern(
+              "python/src/pwndoc_mcp_server/version.py", r'_FALLBACK_VERSION = \"([^\"]+)\"'
+          )
+
+          with open("mcp-registry.json", "r", encoding="utf-8") as f:
+              registry_version = json.load(f)["version"]
+
+          mismatches = []
+          if tag != project_version:
+              mismatches.append(f"Tag version {tag} != pyproject version {project_version}")
+          if project_version != fallback_version:
+              mismatches.append(
+                  f"pyproject version {project_version} != fallback version {fallback_version}"
+              )
+          if project_version != registry_version:
+              mismatches.append(
+                  f"pyproject version {project_version} != registry version {registry_version}"
+              )
+
+          if mismatches:
+              for line in mismatches:
+                  print(f"VERSION MISMATCH: {line}")
+              print("Run: python python/scripts/bump_version.py --version", tag)
+              sys.exit(1)
+          else:
+              print(f"Versions are consistent for tag v{tag}")
+          PY
       
       - name: Set up Python
         uses: actions/setup-python@v5

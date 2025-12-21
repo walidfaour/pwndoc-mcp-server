@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pwndoc-mcp-server"
-version = "1.0.0.post1"
+version = "1.0.2"
 description = "Model Context Protocol server for PwnDoc penetration testing documentation"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
-    { name = "Walid Faour", email = "walid@walidfaour.com" }
+    { name = "Walid Faour", email = "security@walidfaour.com" }
 ]
 keywords = [
     "mcp",
@@ -39,6 +39,8 @@ classifiers = [
 ]
 dependencies = [
     "httpx>=0.25.0",
+    "rich>=13.0.0",
+    "typer>=0.9.0",
     "pyyaml>=6.0",
 ]
 
@@ -65,7 +67,7 @@ dev = [
 ]
 
 [project.scripts]
-pwndoc-mcp = "pwndoc_mcp_server.cli:app"
+pwndoc-mcp = "pwndoc_mcp_server.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/walidfaour/pwndoc-mcp-server"

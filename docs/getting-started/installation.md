@@ -86,26 +86,26 @@ Download `pwndoc-mcp-server-windows-x64.exe` from the releases page and add to y
 
 ```bash
 # Download the .deb package
-wget https://github.com/walidfaour/pwndoc-mcp-server/releases/latest/download/pwndoc-mcp-server_1.0.0_amd64.deb
+wget https://github.com/walidfaour/pwndoc-mcp-server/releases/latest/download/pwndoc-mcp-server_1.0.2_amd64.deb
 
 # Install
-sudo dpkg -i pwndoc-mcp-server_1.0.0_amd64.deb
+sudo dpkg -i pwndoc-mcp-server_1.0.2_amd64.deb
 
 # Or with apt (handles dependencies)
-sudo apt install ./pwndoc-mcp-server_1.0.0_amd64.deb
+sudo apt install ./pwndoc-mcp-server_1.0.2_amd64.deb
 ```
 
 ### RHEL/Fedora/CentOS (yum/dnf)
 
 ```bash
 # Download the .rpm package
-wget https://github.com/walidfaour/pwndoc-mcp-server/releases/latest/download/pwndoc-mcp-server-1.0.0-1.x86_64.rpm
+wget https://github.com/walidfaour/pwndoc-mcp-server/releases/latest/download/pwndoc-mcp-server-1.0.2-1.x86_64.rpm
 
 # Install with yum
-sudo yum localinstall pwndoc-mcp-server-1.0.0-1.x86_64.rpm
+sudo yum localinstall pwndoc-mcp-server-1.0.2-1.x86_64.rpm
 
 # Or with dnf
-sudo dnf install ./pwndoc-mcp-server-1.0.0-1.x86_64.rpm
+sudo dnf install ./pwndoc-mcp-server-1.0.2-1.x86_64.rpm
 ```
 
 ### Homebrew (macOS)
