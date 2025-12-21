@@ -169,15 +169,19 @@ if HAS_RICH:
         table.add_row("Username", config.username or "[dim]not set[/dim]")
         table.add_row(
             "Password",
-            ("*" * 8 if config.password else "[dim]not set[/dim]")
-            if not reveal_secrets
-            else config.password,
+            (
+                ("*" * 8 if config.password else "[dim]not set[/dim]")
+                if not reveal_secrets
+                else config.password
+            ),
         )
         table.add_row(
             "Token",
-            ("*" * 20 if config.token else "[dim]not set[/dim]")
-            if not reveal_secrets
-            else (config.token or ""),
+            (
+                ("*" * 20 if config.token else "[dim]not set[/dim]")
+                if not reveal_secrets
+                else (config.token or "")
+            ),
         )
         table.add_row("Verify SSL", str(config.verify_ssl))
         table.add_row("Timeout", str(config.timeout))
