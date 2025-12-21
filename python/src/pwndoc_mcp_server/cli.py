@@ -130,19 +130,35 @@ if HAS_RICH:
         log_level: str = typer.Option("INFO", help="Log level"),
         log_file: Optional[str] = typer.Option(None, help="Log file path"),
         config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config file path"),
+        url: Optional[str] = typer.Option(None, "--url", help="PwnDoc server URL"),
+        username: Optional[str] = typer.Option(None, "--username", "-u", help="PwnDoc username"),
+        password: Optional[str] = typer.Option(None, "--password", "-p", help="PwnDoc password"),
+        token: Optional[str] = typer.Option(None, "--token", "-t", help="PwnDoc JWT token"),
     ):
         """Start the MCP server."""
         setup_logging(log_level, log_file)
 
         try:
-            config = load_config(
-                config_file=config_file,
-                mcp_transport=transport,
-                mcp_host=host,
-                mcp_port=port,
-                log_level=log_level,
-                log_file=log_file,
-            )
+            # Build config overrides from CLI arguments
+            overrides = {
+                "mcp_transport": transport,
+                "mcp_host": host,
+                "mcp_port": port,
+                "log_level": log_level,
+                "log_file": log_file or "",
+            }
+
+            # Add authentication overrides if provided
+            if url:
+                overrides["url"] = url
+            if username:
+                overrides["username"] = username
+            if password:
+                overrides["password"] = password
+            if token:
+                overrides["token"] = token
+
+            config = load_config(config_file=config_file, **overrides)
 
             if not config.is_configured:
                 console.print(
@@ -271,9 +287,24 @@ if HAS_RICH:
     @app.command()
     def test(
         config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config file path"),
+        url: Optional[str] = typer.Option(None, "--url", help="PwnDoc server URL"),
+        username: Optional[str] = typer.Option(None, "--username", "-u", help="PwnDoc username"),
+        password: Optional[str] = typer.Option(None, "--password", "-p", help="PwnDoc password"),
+        token: Optional[str] = typer.Option(None, "--token", "-t", help="PwnDoc JWT token"),
     ):
         """Test connection to PwnDoc server."""
-        config = load_config(config_file=config_file)
+        # Build config overrides from CLI arguments
+        overrides = {}
+        if url:
+            overrides["url"] = url
+        if username:
+            overrides["username"] = username
+        if password:
+            overrides["password"] = password
+        if token:
+            overrides["token"] = token
+
+        config = load_config(config_file=config_file, **overrides)
 
         if not config.is_configured:
             console.print(

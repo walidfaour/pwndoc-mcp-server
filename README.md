@@ -131,25 +131,44 @@ The interactive wizard will guide you through configuration and support both aut
 
 ### Authentication Methods
 
+You can authenticate using **environment variables**, **config file**, or **CLI arguments**.
+
 **Option 1: Username/Password (Recommended)**
-- Automatically handles token generation and refresh
-- No manual token management required
-- Works with environment variables or config file
+- ✅ Automatically handles token generation and refresh
+- ✅ No manual token management required
+- ✅ **Preferred** when both credentials and token are provided
 
 ```bash
+# Environment variables
 export PWNDOC_URL="https://pwndoc.example.com"
 export PWNDOC_USERNAME="your-username"
 export PWNDOC_PASSWORD="your-password"
+
+# Or CLI arguments
+pwndoc-mcp serve --url https://pwndoc.example.com --username user --password pass
+pwndoc-mcp test --url https://pwndoc.example.com -u user -p pass
 ```
 
 **Option 2: Pre-authenticated Token**
 - Use if you have a JWT token
-- Requires manual renewal when expired
+- ⚠️ Requires manual renewal when expired
+- Only used if username/password not provided
 
 ```bash
+# Environment variables
 export PWNDOC_URL="https://pwndoc.example.com"
 export PWNDOC_TOKEN="your-jwt-token"
+
+# Or CLI arguments
+pwndoc-mcp serve --url https://pwndoc.example.com --token your-jwt-token
 ```
+
+**Authentication Priority:**
+When multiple methods are configured, the system uses this priority:
+1. **Username/Password** (if both provided) → automatic token refresh ✅
+2. **Token** (if username/password not provided) → manual renewal required ⚠️
+
+This means if you set all three (URL + username/password + token), it will use username/password and ignore the token.
 
 ### Configuration File
 
