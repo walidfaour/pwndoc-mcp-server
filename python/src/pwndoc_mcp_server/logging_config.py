@@ -27,15 +27,14 @@ Example:
     >>> setup_logging(level="DEBUG", log_file="/var/log/pwndoc-mcp.log")
 """
 
-import os
-import sys
 import json
 import logging
 import logging.handlers
+import os
+import sys
 from datetime import datetime
-from typing import Optional, Dict, Any
 from pathlib import Path
-
+from typing import Any, Dict, Optional
 
 # Custom log format
 DEFAULT_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
