@@ -56,7 +56,7 @@ class Config:
 
     # Logging settings
     log_level: str = "INFO"
-    log_file: Optional[str] = None
+    log_file: str = ""
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     # MCP settings
@@ -152,12 +152,12 @@ class Config:
         errors = []
 
         if not self.url:
-            errors.append("URL is required")
+            errors.append("PWNDOC_URL is required")
         elif not self.url.startswith(("http://", "https://")):
             errors.append(f"Invalid URL format: {self.url}")
 
         if not self.token and not (self.username and self.password):
-            errors.append("Authentication required: provide either token or username/password")
+            errors.append("Authentication required: provide either PWNDOC_TOKEN or PWNDOC_USERNAME/PWNDOC_PASSWORD")
 
         if self.timeout < 1:
             errors.append(f"Timeout must be positive: {self.timeout}")

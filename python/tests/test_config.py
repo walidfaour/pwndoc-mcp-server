@@ -13,6 +13,7 @@ from pwndoc_mcp_server.config import (
     Config,
     DEFAULT_CONFIG_DIR,
     DEFAULT_CONFIG_FILE,
+    get_config_path,
     load_config,
     save_config,
 )

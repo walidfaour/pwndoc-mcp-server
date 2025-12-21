@@ -22,8 +22,12 @@ from pwndoc_mcp_server.config import (
     load_config,
     save_config,
 )
-from pwndoc_mcp_server.logging_config import get_logger, setup_logging
-from pwndoc_mcp_server.server import PwnDocMCPServer
+from pwndoc_mcp_server.logging_config import LogLevel, get_logger, setup_logging
+from pwndoc_mcp_server.server import (
+    TOOL_DEFINITIONS,
+    PwnDocMCPServer,
+    create_server,
+)
 
 __all__ = [
     # Version
@@ -42,7 +46,10 @@ __all__ = [
     "NotFoundError",
     # Server
     "PwnDocMCPServer",
+    "TOOL_DEFINITIONS",
+    "create_server",
     # Logging
+    "LogLevel",
     "setup_logging",
     "get_logger",
 ]
