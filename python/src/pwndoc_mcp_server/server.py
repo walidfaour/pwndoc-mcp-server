@@ -891,9 +891,7 @@ def _get_tool_definitions() -> List[Dict]:
 TOOL_DEFINITIONS = _get_tool_definitions()
 
 
-def create_server(
-    config: Optional[Config] = None, **kwargs
-) -> PwnDocMCPServer:
+def create_server(config: Optional[Config] = None, **kwargs) -> PwnDocMCPServer:
     """
     Create and configure a PwnDoc MCP server.
 

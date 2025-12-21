@@ -220,7 +220,7 @@ class PwnDocClient:
             user_data = self.get_current_user()
 
             # Handle both sync and async mocked returns
-            if hasattr(user_data, '__await__'):
+            if hasattr(user_data, "__await__"):
                 user_data = await user_data
 
             # Extract username from response (handle both direct and nested format)
