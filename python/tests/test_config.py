@@ -11,10 +11,10 @@ from unittest.mock import patch, MagicMock
 
 from pwndoc_mcp_server.config import (
     Config,
+    DEFAULT_CONFIG_DIR,
+    DEFAULT_CONFIG_FILE,
     load_config,
     save_config,
-    get_config_path,
-    DEFAULT_CONFIG,
 )
 
 

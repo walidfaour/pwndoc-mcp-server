@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 import json
 import os
 
-from pwndoc_mcp_server.cli import app, version_callback
+from pwndoc_mcp_server.cli import app
 
 
 @pytest.fixture
