@@ -168,18 +168,21 @@ class TestTestCommand:
         """Test failed connection test."""
         from pwndoc_mcp_server.config import Config
         from pwndoc_mcp_server.client import AuthenticationError
-        
+
         mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="invalid-token"
         )
-        
-        mock_instance = AsyncMock()
+
+        # Use MagicMock and configure context manager properly
+        mock_instance = MagicMock()
+        mock_instance.__enter__.return_value = mock_instance
+        mock_instance.__exit__.return_value = None
+        mock_instance.authenticate.side_effect = AuthenticationError("Auth failed")
         mock_client.return_value = mock_instance
-        mock_instance.authenticate = AsyncMock(side_effect=AuthenticationError("Auth failed"))
-        
+
         result = runner.invoke(app, ["test"])
-        
+
         # Should indicate failure
         assert result.exit_code != 0 or "error" in result.stdout.lower() or "fail" in result.stdout.lower()
 
