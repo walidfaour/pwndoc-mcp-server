@@ -56,7 +56,7 @@ class Config:
 
     # Logging settings
     log_level: str = "INFO"
-    log_file: Optional[str] = None
+    log_file: str = ""
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     # MCP settings
@@ -108,11 +108,12 @@ class Config:
             return "credentials"
         return "none"
 
-    def to_dict(self, include_secrets: bool = False) -> Dict[str, Any]:
+    def to_dict(self, include_secrets: bool = True) -> Dict[str, Any]:
         """Convert config to dictionary.
 
         Args:
-            include_secrets: If True, include passwords and tokens
+            include_secrets: If True, include actual passwords and tokens.
+                           If False, mask them with "***"
 
         Returns:
             Dictionary representation of config
@@ -131,8 +132,8 @@ class Config:
             d["password"] = self.password
             d["token"] = self.token
         else:
-            d["has_password"] = bool(self.password)
-            d["has_token"] = bool(self.token)
+            d["password"] = "***" if self.password else ""
+            d["token"] = "***" if self.token else ""
 
         return d
 
@@ -152,12 +153,12 @@ class Config:
         errors = []
 
         if not self.url:
-            errors.append("URL is required")
+            errors.append("PWNDOC_URL is required")
         elif not self.url.startswith(("http://", "https://")):
             errors.append(f"Invalid URL format: {self.url}")
 
         if not self.token and not (self.username and self.password):
-            errors.append("Authentication required: provide either token or username/password")
+            errors.append("Authentication required: provide either PWNDOC_TOKEN or PWNDOC_USERNAME/PWNDOC_PASSWORD")
 
         if self.timeout < 1:
             errors.append(f"Timeout must be positive: {self.timeout}")
@@ -264,14 +265,19 @@ def load_config(config_file: Optional[Path] = None, **overrides: Any) -> Config:
 
     # Load from file (lowest priority after defaults)
     if config_file is None:
-        # Check default locations
-        for path in [DEFAULT_CONFIG_FILE, DEFAULT_CONFIG_DIR / "config.json"]:
-            if path.exists():
-                config_file = path
-                break
+        # Check PWNDOC_CONFIG_FILE environment variable first
+        config_file_env = os.getenv("PWNDOC_CONFIG_FILE")
+        if config_file_env:
+            config_file = Path(config_file_env).expanduser()
+        else:
+            # Check default locations
+            for path in [DEFAULT_CONFIG_FILE, DEFAULT_CONFIG_DIR / "config.json"]:
+                if path.exists():
+                    config_file = path
+                    break
 
-    if config_file:
-        file_config = _load_from_file(config_file)
+    if config_file and Path(config_file).exists():
+        file_config = _load_from_file(Path(config_file))
         config_dict.update(file_config)
         logger.debug(f"Loaded config from {config_file}")
 
@@ -333,7 +339,7 @@ def save_config(config: Config, config_file: Optional[Path] = None) -> Path:
     return config_file
 
 
-def get_config_path() -> Path:
+def get_config_path() -> str:
     """
     Get the path to the configuration file.
 
@@ -341,12 +347,12 @@ def get_config_path() -> Path:
     then returns the default path.
 
     Returns:
-        Path to configuration file
+        Path to configuration file as string
     """
     config_path_env = os.getenv("PWNDOC_CONFIG_FILE")
     if config_path_env:
-        return Path(config_path_env).expanduser()
-    return DEFAULT_CONFIG_FILE
+        return str(Path(config_path_env).expanduser())
+    return str(DEFAULT_CONFIG_FILE)
 
 
 def init_config_interactive() -> Config:

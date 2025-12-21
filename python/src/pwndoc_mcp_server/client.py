@@ -86,40 +86,163 @@ class PwnDocClient:
         >>> audit = client.get_audit("507f1f77bcf86cd799439011")
     """
 
-    def __init__(self, config: Config):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        url: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
+        verify_ssl: bool = True,
+        timeout: int = 30,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+        rate_limit_requests: int = 100,
+        rate_limit_period: int = 60,
+    ):
         """
         Initialize PwnDoc client.
 
         Args:
-            config: Configuration object with connection settings
+            config: Configuration object (if provided, other params are ignored)
+            url: PwnDoc server URL
+            username: Username for authentication
+            password: Password for authentication
+            token: Pre-authenticated JWT token
+            verify_ssl: Verify SSL certificates
+            timeout: Request timeout in seconds
+            max_retries: Maximum number of retries
+            retry_delay: Delay between retries
+            rate_limit_requests: Max requests per period
+            rate_limit_period: Rate limit period in seconds
         """
-        self.config = config
-        self.base_url = config.url.rstrip("/")
-        self._token: Optional[str] = config.token
+        # If config provided, use it; otherwise create from parameters
+        if config is not None:
+            self.config = config
+        else:
+            self.config = Config(
+                url=url or "",
+                username=username or "",
+                password=password or "",
+                token=token or "",
+                verify_ssl=verify_ssl,
+                timeout=timeout,
+                max_retries=max_retries,
+                retry_delay=retry_delay,
+                rate_limit_requests=rate_limit_requests,
+                rate_limit_period=rate_limit_period,
+            )
+
+        self.base_url = self.config.url.rstrip("/")
+        self._token: Optional[str] = self.config.token or None
         self._token_expires: Optional[datetime] = None
         self._refresh_token: Optional[str] = None
 
-        self.rate_limiter = RateLimiter(config.rate_limit_requests, config.rate_limit_period)
+        self.rate_limiter = RateLimiter(
+            self.config.rate_limit_requests, self.config.rate_limit_period
+        )
 
         # Configure HTTP client
         self._client = httpx.Client(
             base_url=self.base_url,
-            timeout=config.timeout,
-            verify=config.verify_ssl,
+            timeout=self.config.timeout,
+            verify=self.config.verify_ssl,
             follow_redirects=True,
         )
 
         logger.debug(f"PwnDocClient initialized for {self.base_url}")
 
+    @classmethod
+    def from_config(cls, config: Config) -> "PwnDocClient":
+        """
+        Create client from config object.
+
+        Args:
+            config: Configuration object
+
+        Returns:
+            PwnDocClient instance
+
+        Example:
+            >>> config = Config(url="https://pwndoc.com", token="...")
+            >>> client = PwnDocClient.from_config(config)
+        """
+        return cls(config=config)
+
+    @property
+    def url(self) -> str:
+        """Get the base URL."""
+        return self.base_url
+
+    @property
+    def token(self) -> Optional[str]:
+        """Get the current token."""
+        return self._token
+
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
-        self.close()
-
-    def close(self):
-        """Close the HTTP client."""
         self._client.close()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        await self.close()
+
+    async def close(self):
+        """Close the HTTP client (async)."""
+        self._client.close()
+
+    async def _ensure_token(self):
+        """Ensure we have a valid authentication token (async wrapper)."""
+        if not self.is_authenticated:
+            self.authenticate()
+
+    async def test_connection(self) -> Dict[str, Any]:
+        """
+        Test the connection to PwnDoc server.
+
+        Returns:
+            Dict with status and connection info
+
+        Example:
+            >>> result = await client.test_connection()
+            >>> if result["status"] == "ok":
+            ...     print(f"Connected as {result['user']}")
+        """
+        try:
+            # Try to ensure token (async for test compatibility)
+            await self._ensure_token()
+
+            # Get current user to verify connection
+            user_data = self.get_current_user()
+
+            # Handle both sync and async mocked returns
+            if hasattr(user_data, '__await__'):
+                user_data = await user_data
+
+            # Extract username from response (handle both direct and nested format)
+            if isinstance(user_data, dict):
+                if "datas" in user_data:
+                    username = user_data.get("datas", {}).get("username", "unknown")
+                else:
+                    username = user_data.get("username", "unknown")
+            else:
+                username = "unknown"
+
+            return {
+                "status": "ok",
+                "user": username,
+                "url": self.base_url,
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "error": str(e),
+                "url": self.base_url,
+            }
 
     @property
     def is_authenticated(self) -> bool:

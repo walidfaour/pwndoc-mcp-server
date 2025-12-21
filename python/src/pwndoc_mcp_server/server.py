@@ -62,14 +62,22 @@ class PwnDocMCPServer:
     SERVER_VERSION = "1.0.0"
     PROTOCOL_VERSION = "2024-11-05"
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None, transport: Optional[str] = None):
         """
         Initialize MCP server.
 
         Args:
             config: Configuration object (loads from environment if not provided)
+            transport: Transport type (stdio, sse, websocket)
         """
         self.config = config or load_config()
+        self.transport = transport or self.config.mcp_transport
+
+        # Validate transport
+        valid_transports = ["stdio", "sse", "websocket"]
+        if self.transport not in valid_transports:
+            raise ValueError(f"Invalid transport: {self.transport}")
+
         self._client: Optional[PwnDocClient] = None
         self._tools: Dict[str, Tool] = {}
         self._initialized = False
@@ -78,6 +86,16 @@ class PwnDocMCPServer:
         self._register_tools()
 
         logger.info(f"PwnDocMCPServer initialized with {len(self._tools)} tools")
+
+    @property
+    def name(self) -> str:
+        """Get server name."""
+        return self.SERVER_NAME
+
+    @property
+    def version(self) -> str:
+        """Get server version."""
+        return self.SERVER_VERSION
 
     @property
     def client(self) -> PwnDocClient:
@@ -349,6 +367,39 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="update_client",
+            description="Update an existing client.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client ID"},
+                    "firstname": {"type": "string", "description": "First name"},
+                    "lastname": {"type": "string", "description": "Last name"},
+                    "email": {"type": "string", "description": "Client email"},
+                    "phone": {"type": "string", "description": "Phone number"},
+                    "cell": {"type": "string", "description": "Cell phone"},
+                    "title": {"type": "string", "description": "Job title"},
+                    "company": {"type": "string", "description": "Company ID"},
+                },
+                "required": ["client_id"],
+            },
+            handler=self._handle_update_client,
+        )
+
+        self._register_tool(
+            name="delete_client",
+            description="Delete a client.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client ID to delete"}
+                },
+                "required": ["client_id"],
+            },
+            handler=self._handle_delete_client,
+        )
+
+        self._register_tool(
             name="list_companies",
             description="List all companies.",
             parameters={"type": "object", "properties": {}},
@@ -538,6 +589,13 @@ class PwnDocMCPServer:
     def _handle_create_client(self, **kwargs) -> Dict:
         return self.client.create_client(**kwargs)
 
+    def _handle_update_client(self, client_id: str, **kwargs) -> Dict:
+        return self.client.update_client(client_id, **kwargs)
+
+    def _handle_delete_client(self, client_id: str) -> Dict:
+        self.client.delete_client(client_id)
+        return {"success": True, "message": f"Client {client_id} deleted"}
+
     def _handle_list_companies(self) -> List[Dict]:
         return self.client.list_companies()
 
@@ -570,6 +628,66 @@ class PwnDocMCPServer:
 
     def _handle_get_statistics(self) -> Dict:
         return self.client.get_statistics()
+
+    # =========================================================================
+    # PUBLIC API METHODS (for testing and direct use)
+    # =========================================================================
+
+    async def handle_initialize(self, params: Dict) -> Dict:
+        """
+        Handle MCP initialize request (async public method).
+
+        Args:
+            params: Initialize parameters
+
+        Returns:
+            Initialize response with capabilities
+        """
+        return self._handle_initialize(params)
+
+    async def handle_list_tools(self) -> List[Dict]:
+        """
+        Handle list tools request (async public method).
+
+        Returns:
+            List of tool definitions
+        """
+        result = self._handle_list_tools({})
+        return result.get("tools", [])
+
+    async def handle_call_tool(self, name: str, arguments: Dict) -> Any:
+        """
+        Handle call tool request (async public method).
+
+        Args:
+            name: Tool name
+            arguments: Tool arguments
+
+        Returns:
+            Tool result
+
+        Raises:
+            ValueError: If tool is unknown
+        """
+        params = {"name": name, "arguments": arguments}
+        return self._handle_call_tool(params)
+
+    def _format_result(self, data: Any) -> str:
+        """
+        Format result data for output.
+
+        Args:
+            data: Data to format
+
+        Returns:
+            Formatted string
+        """
+        if isinstance(data, str):
+            return data
+        elif data is None:
+            return "null"
+        else:
+            return json.dumps(data, indent=2, default=str)
 
     # =========================================================================
     # MCP PROTOCOL HANDLING
@@ -741,6 +859,67 @@ class PwnDocMCPServer:
             asyncio.run(self.run_sse(self.config.mcp_host, self.config.mcp_port))
         else:
             raise ValueError(f"Unsupported transport: {transport}")
+
+
+# Module-level constant for tool definitions (for compatibility)
+TOOL_DEFINITIONS: Optional[List[Dict]] = None
+
+
+def _get_tool_definitions() -> List[Dict]:
+    """
+    Get tool definitions from server instance.
+
+    Returns:
+        List of tool definitions
+    """
+    # Create a temporary server to extract tool definitions
+    config = Config(url="http://temp", token="temp")
+    server = PwnDocMCPServer(config)
+    tools = []
+    for tool in server._tools.values():
+        tools.append(
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "inputSchema": tool.parameters,
+            }
+        )
+    return tools
+
+
+# Initialize TOOL_DEFINITIONS on module load
+TOOL_DEFINITIONS = _get_tool_definitions()
+
+
+def create_server(
+    config: Optional[Config] = None, **kwargs
+) -> PwnDocMCPServer:
+    """
+    Create and configure a PwnDoc MCP server.
+
+    Args:
+        config: Configuration object (if provided, kwargs are ignored)
+        **kwargs: Configuration parameters (url, token, etc.)
+
+    Returns:
+        Configured PwnDocMCPServer instance
+
+    Raises:
+        ValueError: If configuration is invalid
+
+    Example:
+        >>> server = create_server(url="https://pwndoc.com", token="...")
+        >>> server = create_server(config)
+    """
+    if config is None:
+        config = Config(**kwargs)
+
+    # Validate configuration
+    errors = config.validate()
+    if errors:
+        raise ValueError(f"Invalid configuration: {'; '.join(errors)}")
+
+    return PwnDocMCPServer(config)
 
 
 def main():

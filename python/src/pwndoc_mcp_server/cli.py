@@ -23,6 +23,7 @@ try:
     import typer
     from rich.console import Console
     from rich.panel import Panel
+    from rich.prompt import Prompt
     from rich.syntax import Syntax
     from rich.table import Table
 
@@ -30,6 +31,7 @@ try:
 except ImportError:
     HAS_RICH = False
     typer = None
+    Prompt = None
 
 from pwndoc_mcp_server import __version__
 from pwndoc_mcp_server.client import PwnDocClient, PwnDocError
@@ -49,9 +51,30 @@ if HAS_RICH:
         add_completion=True,
     )
     console = Console()
+
+    def version_callback(value: bool):
+        """Callback for --version flag."""
+        if value:
+            console.print(f"pwndoc-mcp-server version {__version__}")
+            raise typer.Exit()
+
+    @app.callback()
+    def main(
+        version: Optional[bool] = typer.Option(
+            None,
+            "--version",
+            "-v",
+            help="Show version and exit",
+            callback=version_callback,
+            is_eager=True,
+        )
+    ):
+        """PwnDoc MCP Server CLI."""
+        pass
 else:
     app = None
     console = None
+    version_callback = None
 
 
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None):

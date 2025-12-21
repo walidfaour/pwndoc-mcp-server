@@ -33,8 +33,20 @@ import logging.handlers
 import os
 import sys
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+
+class LogLevel(Enum):
+    """Log level enumeration."""
+
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
+
 
 # Custom log format
 DEFAULT_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -120,9 +132,12 @@ def setup_logging(
     log_file: Optional[str] = None,
     log_format: str = "text",
     max_size_mb: int = 10,
+    max_bytes: Optional[int] = None,
     backup_count: int = 5,
     json_output: bool = False,
     colored: bool = True,
+    console: bool = True,
+    name: Optional[str] = None,
 ) -> logging.Logger:
     """
     Configure logging for the application.
@@ -132,19 +147,35 @@ def setup_logging(
         log_file: Path to log file (optional)
         log_format: Format type ('text', 'json', 'detailed')
         max_size_mb: Maximum log file size in MB
+        max_bytes: Maximum log file size in bytes (overrides max_size_mb)
         backup_count: Number of backup files to keep
         json_output: Use JSON format for all output
         colored: Use colored output for console
+        console: Enable console output (default: True)
+        name: Logger name (default: root logger)
 
     Returns:
-        Root logger configured for the application
+        Logger configured for the application
 
     Example:
         >>> logger = setup_logging(level="DEBUG", log_file="app.log")
         >>> logger.info("Application started")
     """
-    # Get root logger
-    root_logger = logging.getLogger()
+    # Check environment variables for overrides
+    env_level = os.environ.get("PWNDOC_LOG_LEVEL")
+    if env_level:
+        level = env_level
+
+    env_file = os.environ.get("PWNDOC_LOG_FILE")
+    if env_file:
+        log_file = env_file
+
+    # Get logger (root or named)
+    if name:
+        root_logger = logging.getLogger(name)
+    else:
+        root_logger = logging.getLogger()
+
     root_logger.setLevel(getattr(logging, level.upper()))
 
     # Clear existing handlers
@@ -164,20 +195,25 @@ def setup_logging(
         else:
             formatter = logging.Formatter(DEFAULT_FORMAT)
 
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stderr)
-    console_handler.setFormatter(formatter)
-    root_logger.addHandler(console_handler)
+    # Console handler (if enabled)
+    if console:
+        console_handler = logging.StreamHandler(sys.stderr)
+        console_handler.setFormatter(formatter)
+        root_logger.addHandler(console_handler)
 
     # File handler (if specified)
     if log_file:
         log_path = Path(log_file)
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
+        # Calculate max bytes
+        if max_bytes is None:
+            max_bytes = max_size_mb * 1024 * 1024
+
         # Use rotating file handler
         file_handler = logging.handlers.RotatingFileHandler(
             log_path,
-            maxBytes=max_size_mb * 1024 * 1024,
+            maxBytes=max_bytes,
             backupCount=backup_count,
         )
 
@@ -196,12 +232,12 @@ def setup_logging(
     return root_logger
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(name: Optional[str] = None) -> logging.Logger:
     """
     Get a logger for a specific module.
 
     Args:
-        name: Logger name (typically __name__)
+        name: Logger name (typically __name__), if None returns root logger
 
     Returns:
         Configured logger instance
@@ -209,7 +245,10 @@ def get_logger(name: str) -> logging.Logger:
     Example:
         >>> logger = get_logger(__name__)
         >>> logger.info("Module initialized")
+        >>> logger = get_logger()  # Get root logger
     """
+    if name is None:
+        return logging.getLogger()
     return logging.getLogger(name)
 
 
