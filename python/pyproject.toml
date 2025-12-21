@@ -1,0 +1,138 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pwndoc-mcp-server"
+version = "1.0.0"
+description = "Model Context Protocol server for PwnDoc penetration testing documentation"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "Walid Faour", email = "walid@walidfaour.com" }
+]
+keywords = [
+    "mcp",
+    "pwndoc",
+    "pentest",
+    "penetration-testing",
+    "security",
+    "vulnerability",
+    "documentation"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Documentation",
+]
+dependencies = [
+    "httpx>=0.25.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+cli = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+sse = [
+    "aiohttp>=3.9.0",
+]
+all = [
+    "pwndoc-mcp-server[cli,sse]",
+]
+dev = [
+    "pwndoc-mcp-server[all]",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+pwndoc-mcp = "pwndoc_mcp_server.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/walidfaour/pwndoc-mcp-server"
+Documentation = "https://github.com/walidfaour/pwndoc-mcp-server#readme"
+Repository = "https://github.com/walidfaour/pwndoc-mcp-server"
+Issues = "https://github.com/walidfaour/pwndoc-mcp-server/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pwndoc_mcp_server"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+]
+
+# Ruff configuration (new format)
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+"__init__.py" = ["F401", "E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pwndoc_mcp_server"]
+
+# Black configuration
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+# Mypy configuration
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/pwndoc_mcp_server"]
+branch = true
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
