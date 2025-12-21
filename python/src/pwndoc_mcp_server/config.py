@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +210,7 @@ def _load_from_env() -> Dict[str, Any]:
         value = os.environ.get(env_var)
         if value is not None:
             try:
-                config[key] = converter(value)
+                config[key] = converter(value)  # type: ignore[operator,misc]
             except (ValueError, TypeError) as e:
                 logger.warning(f"Invalid value for {env_var}: {value} ({e})")
 
@@ -226,15 +226,17 @@ def _load_from_file(config_path: Path) -> Dict[str, Any]:
         content = config_path.read_text()
 
         if config_path.suffix in (".yaml", ".yml"):
-            return yaml.safe_load(content) or {}
+            data = yaml.safe_load(content)
+            return dict(data) if data else {}
         elif config_path.suffix == ".json":
-            return json.loads(content)
+            return dict(json.loads(content))
         else:
             # Try YAML first, then JSON
             try:
-                return yaml.safe_load(content) or {}
+                data = yaml.safe_load(content)
+                return dict(data) if data else {}
             except yaml.YAMLError:
-                return json.loads(content)
+                return dict(json.loads(content))
     except Exception as e:
         logger.warning(f"Failed to load config from {config_path}: {e}")
         return {}
@@ -376,7 +378,7 @@ def init_config_interactive() -> Config:
 
     username = ""
     password = ""
-    token = None
+    token = ""
 
     if auth_choice == "2":
         token = input("JWT Token: ").strip()

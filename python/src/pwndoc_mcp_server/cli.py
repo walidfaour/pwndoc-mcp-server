@@ -17,21 +17,21 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 try:
-    import typer
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.prompt import Prompt
-    from rich.syntax import Syntax
-    from rich.table import Table
+    import typer  # type: ignore[import-not-found]
+    from rich.console import Console  # type: ignore[import-not-found]
+    from rich.panel import Panel  # type: ignore[import-not-found]
+    from rich.prompt import Prompt  # type: ignore[import-not-found]
+    from rich.syntax import Syntax  # type: ignore[import-not-found]
+    from rich.table import Table  # type: ignore[import-not-found]
 
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
-    typer = None
-    Prompt = None
+    typer = None  # type: ignore[assignment]
+    Prompt = None  # type: ignore[assignment,misc]
 
 from pwndoc_mcp_server import __version__
 from pwndoc_mcp_server.client import PwnDocClient, PwnDocError
@@ -59,7 +59,7 @@ if HAS_RICH:
             raise typer.Exit()
 
     @app.callback()
-    def main(
+    def cli_callback(
         version: Optional[bool] = typer.Option(
             None,
             "--version",
@@ -73,14 +73,14 @@ if HAS_RICH:
         pass
 
 else:
-    app = None
-    console = None
-    version_callback = None
+    app = None  # type: ignore[assignment]
+    console = None  # type: ignore[assignment]
+    version_callback = None  # type: ignore[assignment]
 
 
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None):
     """Configure logging."""
-    handlers = [logging.StreamHandler()]
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
     if log_file:
         handlers.append(logging.FileHandler(log_file))
 
@@ -231,12 +231,15 @@ if HAS_RICH:
         if hasattr(config, key):
             # Convert value to appropriate type
             current = getattr(config, key)
+            converted_value: Union[bool, int, str]
             if isinstance(current, bool):
-                value = value.lower() in ("true", "1", "yes")
+                converted_value = value.lower() in ("true", "1", "yes")
             elif isinstance(current, int):
-                value = int(value)
+                converted_value = int(value)
+            else:
+                converted_value = value
 
-            setattr(config, key, value)
+            setattr(config, key, converted_value)
             save_config(config)
             console.print(f"[green]✓[/green] Set {key} = {value}")
         else:
