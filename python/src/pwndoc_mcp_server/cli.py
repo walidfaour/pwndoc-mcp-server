@@ -17,7 +17,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 try:
     import typer
@@ -231,7 +231,7 @@ if HAS_RICH:
         if hasattr(config, key):
             # Convert value to appropriate type
             current = getattr(config, key)
-            converted_value: bool | int | str
+            converted_value: Union[bool, int, str]
             if isinstance(current, bool):
                 converted_value = value.lower() in ("true", "1", "yes")
             elif isinstance(current, int):
