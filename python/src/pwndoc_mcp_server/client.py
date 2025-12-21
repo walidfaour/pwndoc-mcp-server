@@ -183,11 +183,66 @@ class PwnDocClient:
         return self
 
     def __exit__(self, *args):
-        self.close()
-
-    def close(self):
-        """Close the HTTP client."""
         self._client.close()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        await self.close()
+
+    async def close(self):
+        """Close the HTTP client (async)."""
+        self._client.close()
+
+    async def _ensure_token(self):
+        """Ensure we have a valid authentication token (async wrapper)."""
+        if not self.is_authenticated:
+            self.authenticate()
+
+    async def test_connection(self) -> Dict[str, Any]:
+        """
+        Test the connection to PwnDoc server.
+
+        Returns:
+            Dict with status and connection info
+
+        Example:
+            >>> result = await client.test_connection()
+            >>> if result["status"] == "ok":
+            ...     print(f"Connected as {result['user']}")
+        """
+        try:
+            # Try to ensure token (async for test compatibility)
+            await self._ensure_token()
+
+            # Get current user to verify connection
+            user_data = self.get_current_user()
+
+            # Handle both sync and async mocked returns
+            if hasattr(user_data, '__await__'):
+                user_data = await user_data
+
+            # Extract username from response (handle both direct and nested format)
+            if isinstance(user_data, dict):
+                if "datas" in user_data:
+                    username = user_data.get("datas", {}).get("username", "unknown")
+                else:
+                    username = user_data.get("username", "unknown")
+            else:
+                username = "unknown"
+
+            return {
+                "status": "ok",
+                "user": username,
+                "url": self.base_url,
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "error": str(e),
+                "url": self.base_url,
+            }
 
     @property
     def is_authenticated(self) -> bool:

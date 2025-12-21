@@ -367,6 +367,39 @@ class PwnDocMCPServer:
         )
 
         self._register_tool(
+            name="update_client",
+            description="Update an existing client.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client ID"},
+                    "firstname": {"type": "string", "description": "First name"},
+                    "lastname": {"type": "string", "description": "Last name"},
+                    "email": {"type": "string", "description": "Client email"},
+                    "phone": {"type": "string", "description": "Phone number"},
+                    "cell": {"type": "string", "description": "Cell phone"},
+                    "title": {"type": "string", "description": "Job title"},
+                    "company": {"type": "string", "description": "Company ID"},
+                },
+                "required": ["client_id"],
+            },
+            handler=self._handle_update_client,
+        )
+
+        self._register_tool(
+            name="delete_client",
+            description="Delete a client.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "client_id": {"type": "string", "description": "Client ID to delete"}
+                },
+                "required": ["client_id"],
+            },
+            handler=self._handle_delete_client,
+        )
+
+        self._register_tool(
             name="list_companies",
             description="List all companies.",
             parameters={"type": "object", "properties": {}},
@@ -555,6 +588,13 @@ class PwnDocMCPServer:
 
     def _handle_create_client(self, **kwargs) -> Dict:
         return self.client.create_client(**kwargs)
+
+    def _handle_update_client(self, client_id: str, **kwargs) -> Dict:
+        return self.client.update_client(client_id, **kwargs)
+
+    def _handle_delete_client(self, client_id: str) -> Dict:
+        self.client.delete_client(client_id)
+        return {"success": True, "message": f"Client {client_id} deleted"}
 
     def _handle_list_companies(self) -> List[Dict]:
         return self.client.list_companies()
