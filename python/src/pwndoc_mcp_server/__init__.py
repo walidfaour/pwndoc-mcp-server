@@ -4,7 +4,9 @@ PwnDoc MCP Server
 Model Context Protocol server for PwnDoc penetration testing documentation.
 """
 
-__version__ = "1.0.0.post1"
+from pwndoc_mcp_server.version import get_version
+
+__version__ = get_version()
 __author__ = "Walid Faour"
 
 # Export main classes and functions

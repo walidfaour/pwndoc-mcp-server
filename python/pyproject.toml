@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
-    { name = "Walid Faour", email = "walid@walidfaour.com" }
+    { name = "Walid Faour", email = "security@walidfaour.com" }
 ]
 keywords = [
     "mcp",
