@@ -20,12 +20,12 @@ from pathlib import Path
 from typing import Optional, Union
 
 try:
-    import typer
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.prompt import Prompt
-    from rich.syntax import Syntax
-    from rich.table import Table
+    import typer  # type: ignore[import-not-found]
+    from rich.console import Console  # type: ignore[import-not-found]
+    from rich.panel import Panel  # type: ignore[import-not-found]
+    from rich.prompt import Prompt  # type: ignore[import-not-found]
+    from rich.syntax import Syntax  # type: ignore[import-not-found]
+    from rich.table import Table  # type: ignore[import-not-found]
 
     HAS_RICH = True
 except ImportError:

@@ -653,6 +653,7 @@ class PwnDocMCPServer:
             List of tool definitions
         """
         from typing import cast
+
         result = self._handle_list_tools({})
         return cast(List[Dict], result.get("tools", []))
 

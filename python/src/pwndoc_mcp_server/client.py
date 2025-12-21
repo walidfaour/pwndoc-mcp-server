@@ -10,7 +10,7 @@ from collections import deque
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, cast
 
-import httpx
+import httpx  # type: ignore[import-not-found]
 
 from .config import Config
 
