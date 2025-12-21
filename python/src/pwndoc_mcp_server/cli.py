@@ -99,9 +99,7 @@ if HAS_RICH:
         port: int = typer.Option(8080, help="Port for SSE/WebSocket"),
         log_level: str = typer.Option("INFO", help="Log level"),
         log_file: Optional[str] = typer.Option(None, help="Log file path"),
-        config_file: Optional[Path] = typer.Option(
-            None, "--config", "-c", help="Config file path"
-        ),
+        config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config file path"),
     ):
         """Start the MCP server."""
         setup_logging(log_level, log_file)
@@ -158,9 +156,7 @@ if HAS_RICH:
 
     @config_app.command("show")
     def config_show(
-        reveal_secrets: bool = typer.Option(
-            False, "--reveal", help="Show sensitive values"
-        ),
+        reveal_secrets: bool = typer.Option(False, "--reveal", help="Show sensitive values"),
     ):
         """Show current configuration."""
         config = load_config()
@@ -237,9 +233,7 @@ if HAS_RICH:
 
     @app.command()
     def test(
-        config_file: Optional[Path] = typer.Option(
-            None, "--config", "-c", help="Config file path"
-        ),
+        config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config file path"),
     ):
         """Test connection to PwnDoc server."""
         config = load_config(config_file=config_file)
@@ -258,9 +252,7 @@ if HAS_RICH:
                 console.print("[green]✓ Authentication successful[/green]")
 
                 user = client.get_current_user()
-                console.print(
-                    f"[green]✓ Logged in as:[/green] {user.get('username', 'unknown')}"
-                )
+                console.print(f"[green]✓ Logged in as:[/green] {user.get('username', 'unknown')}")
 
                 audits = client.list_audits()
                 console.print(f"[green]✓ Found {len(audits)} audits[/green]")
@@ -284,12 +276,8 @@ if HAS_RICH:
     @app.command()
     def query(
         tool: str = typer.Argument(..., help="Tool name to call"),
-        params: Optional[str] = typer.Option(
-            None, "--params", "-p", help="JSON parameters"
-        ),
-        config_file: Optional[Path] = typer.Option(
-            None, "--config", "-c", help="Config file path"
-        ),
+        params: Optional[str] = typer.Option(None, "--params", "-p", help="JSON parameters"),
+        config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config file path"),
     ):
         """Execute a tool query directly."""
         config = load_config(config_file=config_file)
@@ -312,9 +300,7 @@ if HAS_RICH:
             result = server._tools[tool].handler(**arguments)
 
             # Pretty print result
-            syntax = Syntax(
-                json.dumps(result, indent=2, default=str), "json", theme="monokai"
-            )
+            syntax = Syntax(json.dumps(result, indent=2, default=str), "json", theme="monokai")
             console.print(syntax)
 
         except json.JSONDecodeError as e:
@@ -344,9 +330,7 @@ if HAS_RICH:
         for name, tool in sorted(server._tools.items()):
             table.add_row(
                 name,
-                tool.description[:60] + "..."
-                if len(tool.description) > 60
-                else tool.description,
+                tool.description[:60] + "..." if len(tool.description) > 60 else tool.description,
             )
 
         console.print(table)
@@ -380,9 +364,7 @@ For rich CLI experience, install: pip install typer[all] rich
 
         # Serve command
         serve_parser = subparsers.add_parser("serve", help="Start MCP server")
-        serve_parser.add_argument(
-            "--transport", default="stdio", choices=["stdio", "sse"]
-        )
+        serve_parser.add_argument("--transport", default="stdio", choices=["stdio", "sse"])
         serve_parser.add_argument("--host", default="127.0.0.1")
         serve_parser.add_argument("--port", type=int, default=8080)
         serve_parser.add_argument("--log-level", default="INFO")
