@@ -313,7 +313,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## 🙏 Acknowledgments
 
 - [PwnDoc](https://github.com/pwndoc/pwndoc) - The penetration testing documentation platform
-- **Walid Faour** - walid.faour@example.com
+- **Walid Faour** - security@walidfaour.com
 
 ---
 
