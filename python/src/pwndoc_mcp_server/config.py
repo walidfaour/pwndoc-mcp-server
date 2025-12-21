@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +210,7 @@ def _load_from_env() -> Dict[str, Any]:
         value = os.environ.get(env_var)
         if value is not None:
             try:
-                config[key] = converter(value)  # type: ignore[misc]
+                config[key] = converter(value)  # type: ignore[operator,misc]
             except (ValueError, TypeError) as e:
                 logger.warning(f"Invalid value for {env_var}: {value} ({e})")
 
