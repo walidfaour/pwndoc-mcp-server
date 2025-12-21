@@ -7,7 +7,7 @@ Centralizes version lookup so the CLI and server report the same value.
 from importlib import metadata
 
 PACKAGE_NAME = "pwndoc-mcp-server"
-_FALLBACK_VERSION = "1.0.1"
+_FALLBACK_VERSION = "1.0.2"
 
 
 def get_version() -> str:
