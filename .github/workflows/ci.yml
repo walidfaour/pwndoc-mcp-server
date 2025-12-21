@@ -146,14 +146,14 @@ jobs:
       url: https://pypi.org/project/pwndoc-mcp-server/
     permissions:
       id-token: write
-    
+
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: python-package
           path: dist/
-      
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
