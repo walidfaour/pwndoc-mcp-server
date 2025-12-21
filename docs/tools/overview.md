@@ -167,17 +167,27 @@ PwnDoc MCP Server provides **90 MCP tools** with complete coverage of the PwnDoc
 
 ### get_all_findings_with_context
 
-This powerful tool retrieves ALL findings from ALL audits in a single request, including:
+This is the **most powerful tool** for cross-audit analysis. It retrieves ALL findings from ALL audits in a single request with **comprehensive automatic processing**:
 
-- Finding details (title, description, severity, CVSS)
-- Parent audit information (name, client, company, dates)
-- Team members and scope
-- CWE references
+**Automatic Enhancements:**
+- ✅ **CWE Extraction** - Automatically finds CWE from customFields
+- ✅ **OWASP Extraction** - Extracts OWASP categories from multiple sources
+- ✅ **HTML Stripping** - Removes HTML tags from descriptions, observations, remediation
+- ✅ **Full Team Info** - Creator + collaborators with roles
+- ✅ **Complete Scope URLs** - All audit scope URLs
+- ✅ **Enhanced Context** - Language, audit type, dates, client, company
 
-**Use case**: Cross-audit analysis, vulnerability trending, compliance reporting.
+**Use cases:**
+- CWE/OWASP analysis: "Show me all CWE-79 findings across clients"
+- Vulnerability trending: Track common issues over time
+- Compliance reporting: Generate cross-audit statistics with OWASP mapping
+- Team metrics: Analyze findings by team member
+- Revalidation tracking: Find all findings marked for revalidation
 
+**Example:**
 ```
-"What are the most common vulnerabilities across all our pentests this year?"
+"What are the most common CWE classifications across all our pentests this year?"
+"Show me all OWASP Top 10 findings with their remediation status"
 ```
 
 ### search_findings
