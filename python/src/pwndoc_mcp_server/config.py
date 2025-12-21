@@ -184,10 +184,7 @@ def _load_from_file(config_path: Path) -> Dict[str, Any]:
         return {}
 
 
-def load_config(
-    config_file: Optional[Path] = None,
-    **overrides: Any
-) -> Config:
+def load_config(config_file: Optional[Path] = None, **overrides: Any) -> Config:
     """
     Load configuration from multiple sources.
 
@@ -307,6 +304,7 @@ def init_config_interactive() -> Config:
     else:
         username = input("Username: ").strip()
         import getpass
+
         password = getpass.getpass("Password: ")
 
     verify_ssl = input("\nVerify SSL certificates? (Y/n): ").strip().lower() != "n"

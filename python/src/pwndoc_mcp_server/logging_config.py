@@ -38,7 +38,9 @@ from typing import Any, Dict, Optional
 
 # Custom log format
 DEFAULT_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-DETAILED_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s"
+DETAILED_FORMAT = (
+    "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s"
+)
 SIMPLE_FORMAT = "%(levelname)s: %(message)s"
 
 
@@ -46,10 +48,10 @@ class ColoredFormatter(logging.Formatter):
     """Colored log formatter for console output."""
 
     COLORS = {
-        "DEBUG": "\033[36m",     # Cyan
-        "INFO": "\033[32m",      # Green
-        "WARNING": "\033[33m",   # Yellow
-        "ERROR": "\033[31m",     # Red
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
         "CRITICAL": "\033[35m",  # Magenta
     }
     RESET = "\033[0m"
@@ -95,11 +97,13 @@ class PerformanceLogger:
     def start_timer(self, name: str):
         """Start a performance timer."""
         import time
+
         self._metrics[name] = {"start": time.time()}
 
     def stop_timer(self, name: str) -> float:
         """Stop timer and log duration."""
         import time
+
         if name in self._metrics:
             duration = time.time() - self._metrics[name]["start"]
             self.logger.debug(f"Performance: {name} took {duration:.3f}s")

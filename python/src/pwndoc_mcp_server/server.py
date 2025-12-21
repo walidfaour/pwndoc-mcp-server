@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Tool:
     """MCP Tool definition."""
+
     name: str
     description: str
     parameters: Dict[str, Any]
@@ -36,6 +37,7 @@ class Tool:
 @dataclass
 class MCPMessage:
     """MCP protocol message."""
+
     jsonrpc: str = "2.0"
     id: Optional[Union[str, int]] = None
     method: Optional[str] = None
@@ -100,11 +102,11 @@ class PwnDocMCPServer:
                 "properties": {
                     "finding_title": {
                         "type": "string",
-                        "description": "Filter audits containing findings with this title (optional)"
+                        "description": "Filter audits containing findings with this title (optional)",
                     }
-                }
+                },
             },
-            handler=self._handle_list_audits
+            handler=self._handle_list_audits,
         )
 
         self._register_tool(
@@ -113,14 +115,11 @@ class PwnDocMCPServer:
             parameters={
                 "type": "object",
                 "properties": {
-                    "audit_id": {
-                        "type": "string",
-                        "description": "The audit ID (MongoDB ObjectId)"
-                    }
+                    "audit_id": {"type": "string", "description": "The audit ID (MongoDB ObjectId)"}
                 },
-                "required": ["audit_id"]
+                "required": ["audit_id"],
             },
-            handler=self._handle_get_audit
+            handler=self._handle_get_audit,
         )
 
         self._register_tool(
@@ -131,11 +130,11 @@ class PwnDocMCPServer:
                 "properties": {
                     "name": {"type": "string", "description": "Audit name"},
                     "language": {"type": "string", "description": "Language code (e.g., 'en')"},
-                    "audit_type": {"type": "string", "description": "Type of audit"}
+                    "audit_type": {"type": "string", "description": "Type of audit"},
                 },
-                "required": ["name", "language", "audit_type"]
+                "required": ["name", "language", "audit_type"],
             },
-            handler=self._handle_create_audit
+            handler=self._handle_create_audit,
         )
 
         self._register_tool(
@@ -150,11 +149,15 @@ class PwnDocMCPServer:
                     "company": {"type": "string", "description": "Company ID"},
                     "date_start": {"type": "string", "description": "Start date (ISO format)"},
                     "date_end": {"type": "string", "description": "End date (ISO format)"},
-                    "scope": {"type": "array", "items": {"type": "string"}, "description": "Scope items"}
+                    "scope": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Scope items",
+                    },
                 },
-                "required": ["audit_id"]
+                "required": ["audit_id"],
             },
-            handler=self._handle_update_audit_general
+            handler=self._handle_update_audit_general,
         )
 
         self._register_tool(
@@ -165,9 +168,9 @@ class PwnDocMCPServer:
                 "properties": {
                     "audit_id": {"type": "string", "description": "The audit ID to delete"}
                 },
-                "required": ["audit_id"]
+                "required": ["audit_id"],
             },
-            handler=self._handle_delete_audit
+            handler=self._handle_delete_audit,
         )
 
         self._register_tool(
@@ -175,12 +178,10 @@ class PwnDocMCPServer:
             description="Generate and download the audit report (DOCX).",
             parameters={
                 "type": "object",
-                "properties": {
-                    "audit_id": {"type": "string", "description": "The audit ID"}
-                },
-                "required": ["audit_id"]
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
             },
-            handler=self._handle_generate_report
+            handler=self._handle_generate_report,
         )
 
         # =====================================================================
@@ -192,12 +193,10 @@ class PwnDocMCPServer:
             description="Get all findings/vulnerabilities from a specific audit.",
             parameters={
                 "type": "object",
-                "properties": {
-                    "audit_id": {"type": "string", "description": "The audit ID"}
-                },
-                "required": ["audit_id"]
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
             },
-            handler=self._handle_get_findings
+            handler=self._handle_get_findings,
         )
 
         self._register_tool(
@@ -207,11 +206,11 @@ class PwnDocMCPServer:
                 "type": "object",
                 "properties": {
                     "audit_id": {"type": "string", "description": "The audit ID"},
-                    "finding_id": {"type": "string", "description": "The finding ID"}
+                    "finding_id": {"type": "string", "description": "The finding ID"},
                 },
-                "required": ["audit_id", "finding_id"]
+                "required": ["audit_id", "finding_id"],
             },
-            handler=self._handle_get_finding
+            handler=self._handle_get_finding,
         )
 
         self._register_tool(
@@ -231,11 +230,15 @@ class PwnDocMCPServer:
                     "vuln_type": {"type": "string", "description": "Vulnerability type"},
                     "poc": {"type": "string", "description": "Proof of concept"},
                     "scope": {"type": "string", "description": "Affected scope"},
-                    "references": {"type": "array", "items": {"type": "string"}, "description": "References"}
+                    "references": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "References",
+                    },
                 },
-                "required": ["audit_id", "title"]
+                "required": ["audit_id", "title"],
             },
-            handler=self._handle_create_finding
+            handler=self._handle_create_finding,
         )
 
         self._register_tool(
@@ -256,11 +259,11 @@ class PwnDocMCPServer:
                     "vuln_type": {"type": "string"},
                     "poc": {"type": "string"},
                     "scope": {"type": "string"},
-                    "references": {"type": "array", "items": {"type": "string"}}
+                    "references": {"type": "array", "items": {"type": "string"}},
                 },
-                "required": ["audit_id", "finding_id"]
+                "required": ["audit_id", "finding_id"],
             },
-            handler=self._handle_update_finding
+            handler=self._handle_update_finding,
         )
 
         self._register_tool(
@@ -270,11 +273,11 @@ class PwnDocMCPServer:
                 "type": "object",
                 "properties": {
                     "audit_id": {"type": "string", "description": "The audit ID"},
-                    "finding_id": {"type": "string", "description": "The finding ID to delete"}
+                    "finding_id": {"type": "string", "description": "The finding ID to delete"},
                 },
-                "required": ["audit_id", "finding_id"]
+                "required": ["audit_id", "finding_id"],
             },
-            handler=self._handle_delete_finding
+            handler=self._handle_delete_finding,
         )
 
         self._register_tool(
@@ -285,11 +288,14 @@ class PwnDocMCPServer:
                 "properties": {
                     "title": {"type": "string", "description": "Search by finding title"},
                     "category": {"type": "string", "description": "Filter by category"},
-                    "severity": {"type": "string", "description": "Filter by severity (Critical, High, Medium, Low)"},
-                    "status": {"type": "string", "description": "Filter by status"}
-                }
+                    "severity": {
+                        "type": "string",
+                        "description": "Filter by severity (Critical, High, Medium, Low)",
+                    },
+                    "status": {"type": "string", "description": "Filter by status"},
+                },
             },
-            handler=self._handle_search_findings
+            handler=self._handle_search_findings,
         )
 
         self._register_tool(
@@ -298,11 +304,18 @@ class PwnDocMCPServer:
             parameters={
                 "type": "object",
                 "properties": {
-                    "include_failed": {"type": "boolean", "description": "Include 'Failed' category findings (default: false)"},
-                    "exclude_categories": {"type": "array", "items": {"type": "string"}, "description": "Categories to exclude"}
-                }
+                    "include_failed": {
+                        "type": "boolean",
+                        "description": "Include 'Failed' category findings (default: false)",
+                    },
+                    "exclude_categories": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Categories to exclude",
+                    },
+                },
             },
-            handler=self._handle_get_all_findings_with_context
+            handler=self._handle_get_all_findings_with_context,
         )
 
         # =====================================================================
@@ -313,7 +326,7 @@ class PwnDocMCPServer:
             name="list_clients",
             description="List all clients.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_clients
+            handler=self._handle_list_clients,
         )
 
         self._register_tool(
@@ -328,18 +341,18 @@ class PwnDocMCPServer:
                     "phone": {"type": "string", "description": "Phone number"},
                     "cell": {"type": "string", "description": "Cell phone"},
                     "title": {"type": "string", "description": "Job title"},
-                    "company": {"type": "string", "description": "Company ID"}
+                    "company": {"type": "string", "description": "Company ID"},
                 },
-                "required": ["email", "firstname", "lastname"]
+                "required": ["email", "firstname", "lastname"],
             },
-            handler=self._handle_create_client
+            handler=self._handle_create_client,
         )
 
         self._register_tool(
             name="list_companies",
             description="List all companies.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_companies
+            handler=self._handle_list_companies,
         )
 
         self._register_tool(
@@ -350,11 +363,11 @@ class PwnDocMCPServer:
                 "properties": {
                     "name": {"type": "string", "description": "Company name"},
                     "short_name": {"type": "string", "description": "Short name/abbreviation"},
-                    "logo": {"type": "string", "description": "Logo (base64)"}
+                    "logo": {"type": "string", "description": "Logo (base64)"},
                 },
-                "required": ["name"]
+                "required": ["name"],
             },
-            handler=self._handle_create_company
+            handler=self._handle_create_company,
         )
 
         # =====================================================================
@@ -365,7 +378,7 @@ class PwnDocMCPServer:
             name="list_vulnerabilities",
             description="List all vulnerability templates in the library.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_vulnerabilities
+            handler=self._handle_list_vulnerabilities,
         )
 
         self._register_tool(
@@ -374,10 +387,14 @@ class PwnDocMCPServer:
             parameters={
                 "type": "object",
                 "properties": {
-                    "locale": {"type": "string", "description": "Language code (e.g., 'en', 'fr')", "default": "en"}
-                }
+                    "locale": {
+                        "type": "string",
+                        "description": "Language code (e.g., 'en', 'fr')",
+                        "default": "en",
+                    }
+                },
             },
-            handler=self._handle_get_vulnerabilities_by_locale
+            handler=self._handle_get_vulnerabilities_by_locale,
         )
 
         self._register_tool(
@@ -389,12 +406,15 @@ class PwnDocMCPServer:
                     "details": {"type": "object", "description": "Vulnerability details by locale"},
                     "cvssv3": {"type": "string", "description": "CVSS v3 score"},
                     "priority": {"type": "integer", "description": "Priority (1-4)"},
-                    "remediation_complexity": {"type": "integer", "description": "Complexity (1-3)"},
-                    "category": {"type": "string", "description": "Category"}
+                    "remediation_complexity": {
+                        "type": "integer",
+                        "description": "Complexity (1-3)",
+                    },
+                    "category": {"type": "string", "description": "Category"},
                 },
-                "required": ["details"]
+                "required": ["details"],
             },
-            handler=self._handle_create_vulnerability
+            handler=self._handle_create_vulnerability,
         )
 
         # =====================================================================
@@ -405,14 +425,14 @@ class PwnDocMCPServer:
             name="list_users",
             description="List all users (admin only).",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_users
+            handler=self._handle_list_users,
         )
 
         self._register_tool(
             name="get_current_user",
             description="Get current authenticated user's info.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_get_current_user
+            handler=self._handle_get_current_user,
         )
 
         # =====================================================================
@@ -423,28 +443,28 @@ class PwnDocMCPServer:
             name="list_templates",
             description="List all report templates.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_templates
+            handler=self._handle_list_templates,
         )
 
         self._register_tool(
             name="list_languages",
             description="List all configured languages.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_languages
+            handler=self._handle_list_languages,
         )
 
         self._register_tool(
             name="list_audit_types",
             description="List all audit types.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_list_audit_types
+            handler=self._handle_list_audit_types,
         )
 
         self._register_tool(
             name="get_statistics",
             description="Get comprehensive statistics about audits, findings, clients, and more.",
             parameters={"type": "object", "properties": {}},
-            handler=self._handle_get_statistics
+            handler=self._handle_get_statistics,
         )
 
     def _register_tool(
@@ -453,7 +473,7 @@ class PwnDocMCPServer:
         description: str,
         parameters: Dict[str, Any],
         handler: Callable,
-        required: Optional[List[str]] = None
+        required: Optional[List[str]] = None,
     ):
         """Register a tool."""
         self._tools[name] = Tool(
@@ -461,7 +481,7 @@ class PwnDocMCPServer:
             description=description,
             parameters=parameters,
             handler=handler,
-            required=required or parameters.get("required", [])
+            required=required or parameters.get("required", []),
         )
 
     # =========================================================================
@@ -508,9 +528,7 @@ class PwnDocMCPServer:
         return self.client.search_findings(**kwargs)
 
     def _handle_get_all_findings_with_context(
-        self,
-        include_failed: bool = False,
-        exclude_categories: Optional[List[str]] = None
+        self, include_failed: bool = False, exclude_categories: Optional[List[str]] = None
     ) -> List[Dict]:
         return self.client.get_all_findings_with_context(include_failed, exclude_categories)
 
@@ -569,18 +587,20 @@ class PwnDocMCPServer:
             "serverInfo": {
                 "name": self.SERVER_NAME,
                 "version": self.SERVER_VERSION,
-            }
+            },
         }
 
     def _handle_list_tools(self, params: Dict) -> Dict:
         """Handle tools/list request."""
         tools = []
         for tool in self._tools.values():
-            tools.append({
-                "name": tool.name,
-                "description": tool.description,
-                "inputSchema": tool.parameters,
-            })
+            tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "inputSchema": tool.parameters,
+                }
+            )
         return {"tools": tools}
 
     def _handle_call_tool(self, params: Dict) -> Dict:
@@ -596,20 +616,10 @@ class PwnDocMCPServer:
         try:
             result = tool.handler(**arguments)
             return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": json.dumps(result, indent=2, default=str)
-                    }
-                ]
+                "content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}]
             }
         except PwnDocError as e:
-            return {
-                "content": [
-                    {"type": "text", "text": f"Error: {str(e)}"}
-                ],
-                "isError": True
-            }
+            return {"content": [{"type": "text", "text": f"Error: {str(e)}"}], "isError": True}
 
     def _handle_message(self, message: Dict) -> Optional[Dict]:
         """Process an incoming MCP message."""
@@ -630,29 +640,19 @@ class PwnDocMCPServer:
                 result = handlers[method](params)
                 if result is None:  # Notification
                     return None
-                return {
-                    "jsonrpc": "2.0",
-                    "id": msg_id,
-                    "result": result
-                }
+                return {"jsonrpc": "2.0", "id": msg_id, "result": result}
             except Exception as e:
                 logger.exception(f"Error handling {method}")
                 return {
                     "jsonrpc": "2.0",
                     "id": msg_id,
-                    "error": {
-                        "code": -32603,
-                        "message": str(e)
-                    }
+                    "error": {"code": -32603, "message": str(e)},
                 }
         else:
             return {
                 "jsonrpc": "2.0",
                 "id": msg_id,
-                "error": {
-                    "code": -32601,
-                    "message": f"Method not found: {method}"
-                }
+                "error": {"code": -32601, "message": f"Method not found: {method}"},
             }
 
     # =========================================================================
@@ -699,7 +699,7 @@ class PwnDocMCPServer:
                     "Content-Type": "text/event-stream",
                     "Cache-Control": "no-cache",
                     "Connection": "keep-alive",
-                }
+                },
             )
             await response.prepare(request)
 

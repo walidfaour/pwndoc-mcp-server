@@ -47,21 +47,25 @@ class RateLimiter:
 
 class PwnDocError(Exception):
     """Base exception for PwnDoc API errors."""
+
     pass
 
 
 class AuthenticationError(PwnDocError):
     """Authentication failed."""
+
     pass
 
 
 class RateLimitError(PwnDocError):
     """Rate limit exceeded."""
+
     pass
 
 
 class NotFoundError(PwnDocError):
     """Resource not found."""
+
     pass
 
 
@@ -95,10 +99,7 @@ class PwnDocClient:
         self._token_expires: Optional[datetime] = None
         self._refresh_token: Optional[str] = None
 
-        self.rate_limiter = RateLimiter(
-            config.rate_limit_requests,
-            config.rate_limit_period
-        )
+        self.rate_limiter = RateLimiter(config.rate_limit_requests, config.rate_limit_period)
 
         # Configure HTTP client
         self._client = httpx.Client(
@@ -222,12 +223,7 @@ class PwnDocClient:
             logger.debug(f"Rate limited, waiting {wait_time:.2f}s")
             time.sleep(wait_time)
 
-    def _request(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Dict[str, Any]:
+    def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
         """
         Make an API request with retries and error handling.
 
@@ -252,12 +248,7 @@ class PwnDocClient:
         last_error = None
         for attempt in range(self.config.max_retries):
             try:
-                response = self._client.request(
-                    method,
-                    url,
-                    headers=headers,
-                    **kwargs
-                )
+                response = self._client.request(method, url, headers=headers, **kwargs)
 
                 # Handle response
                 if response.status_code == 200:
@@ -276,15 +267,13 @@ class PwnDocClient:
                     retry_after = int(response.headers.get("Retry-After", 60))
                     raise RateLimitError(f"Rate limited, retry after {retry_after}s")
                 else:
-                    raise PwnDocError(
-                        f"API error: {response.status_code} - {response.text}"
-                    )
+                    raise PwnDocError(f"API error: {response.status_code} - {response.text}")
 
             except httpx.RequestError as e:
                 last_error = e
                 logger.warning(f"Request failed (attempt {attempt + 1}): {e}")
                 if attempt < self.config.max_retries - 1:
-                    time.sleep(self.config.retry_delay * (2 ** attempt))
+                    time.sleep(self.config.retry_delay * (2**attempt))
 
         raise PwnDocError(f"Request failed after {self.config.max_retries} retries: {last_error}")
 
@@ -333,20 +322,9 @@ class PwnDocClient:
         response = self._get(f"/api/audits/{audit_id}/general")
         return response.get("datas", {})
 
-    def create_audit(
-        self,
-        name: str,
-        language: str,
-        audit_type: str,
-        **kwargs
-    ) -> Dict:
+    def create_audit(self, name: str, language: str, audit_type: str, **kwargs) -> Dict:
         """Create a new audit."""
-        data = {
-            "name": name,
-            "language": language,
-            "auditType": audit_type,
-            **kwargs
-        }
+        data = {"name": name, "language": language, "auditType": audit_type, **kwargs}
         response = self._post("/api/audits", json=data)
         return response.get("datas", {})
 
@@ -388,10 +366,7 @@ class PwnDocClient:
 
     def update_review_status(self, audit_id: str, state: bool) -> Dict:
         """Update audit review ready status."""
-        response = self._put(
-            f"/api/audits/{audit_id}/updateReadyForReview",
-            json={"state": state}
-        )
+        response = self._put(f"/api/audits/{audit_id}/updateReadyForReview", json={"state": state})
         return response.get("datas", {})
 
     # =========================================================================
@@ -413,17 +388,9 @@ class PwnDocClient:
         response = self._post(f"/api/audits/{audit_id}/findings", json=kwargs)
         return response.get("datas", {})
 
-    def update_finding(
-        self,
-        audit_id: str,
-        finding_id: str,
-        **kwargs
-    ) -> Dict:
+    def update_finding(self, audit_id: str, finding_id: str, **kwargs) -> Dict:
         """Update an existing finding."""
-        response = self._put(
-            f"/api/audits/{audit_id}/findings/{finding_id}",
-            json=kwargs
-        )
+        response = self._put(f"/api/audits/{audit_id}/findings/{finding_id}", json=kwargs)
         return response.get("datas", {})
 
     def delete_finding(self, audit_id: str, finding_id: str) -> bool:
@@ -434,17 +401,11 @@ class PwnDocClient:
     def sort_findings(self, audit_id: str, finding_order: List[str]) -> Dict:
         """Reorder findings in an audit."""
         response = self._put(
-            f"/api/audits/{audit_id}/sortFindings",
-            json={"findings": finding_order}
+            f"/api/audits/{audit_id}/sortFindings", json={"findings": finding_order}
         )
         return response.get("datas", {})
 
-    def move_finding(
-        self,
-        audit_id: str,
-        finding_id: str,
-        destination_audit_id: str
-    ) -> Dict:
+    def move_finding(self, audit_id: str, finding_id: str, destination_audit_id: str) -> Dict:
         """Move finding to another audit."""
         response = self._post(
             f"/api/audits/{audit_id}/findings/{finding_id}/move/{destination_audit_id}"
@@ -536,10 +497,7 @@ class PwnDocClient:
 
     def create_vulnerability_from_finding(self, **kwargs) -> Dict:
         """Create vulnerability template from finding."""
-        response = self._post(
-            "/api/vulnerabilities/from-finding",
-            json=kwargs
-        )
+        response = self._post("/api/vulnerabilities/from-finding", json=kwargs)
         return response.get("datas", {})
 
     # =========================================================================
@@ -593,8 +551,7 @@ class PwnDocClient:
     def create_template(self, name: str, ext: str, file_content: str) -> Dict:
         """Create/upload a report template."""
         response = self._post(
-            "/api/templates",
-            json={"name": name, "ext": ext, "file": file_content}
+            "/api/templates", json={"name": name, "ext": ext, "file": file_content}
         )
         return response.get("datas", {})
 
@@ -689,16 +646,10 @@ class PwnDocClient:
         )
         return response.content
 
-    def upload_image(
-        self,
-        audit_id: str,
-        name: str,
-        value: str
-    ) -> Dict:
+    def upload_image(self, audit_id: str, name: str, value: str) -> Dict:
         """Upload an image."""
         response = self._post(
-            "/api/images",
-            json={"auditId": audit_id, "name": name, "value": value}
+            "/api/images", json={"auditId": audit_id, "name": name, "value": value}
         )
         return response.get("datas", {})
 
@@ -728,7 +679,7 @@ class PwnDocClient:
         title: Optional[str] = None,
         category: Optional[str] = None,
         severity: Optional[str] = None,
-        status: Optional[str] = None
+        status: Optional[str] = None,
     ) -> List[Dict]:
         """Search findings across all audits."""
         results = []
@@ -746,9 +697,13 @@ class PwnDocClient:
                 if severity:
                     # Map CVSS to severity
                     cvss = finding.get("cvssv3", "")
-                    if severity.lower() == "critical" and not (cvss and float(cvss.split("/")[0]) >= 9.0):
+                    if severity.lower() == "critical" and not (
+                        cvss and float(cvss.split("/")[0]) >= 9.0
+                    ):
                         match = False
-                    elif severity.lower() == "high" and not (cvss and 7.0 <= float(cvss.split("/")[0]) < 9.0):
+                    elif severity.lower() == "high" and not (
+                        cvss and 7.0 <= float(cvss.split("/")[0]) < 9.0
+                    ):
                         match = False
 
                 if match:
@@ -759,9 +714,7 @@ class PwnDocClient:
         return results
 
     def get_all_findings_with_context(
-        self,
-        include_failed: bool = False,
-        exclude_categories: Optional[List[str]] = None
+        self, include_failed: bool = False, exclude_categories: Optional[List[str]] = None
     ) -> List[Dict]:
         """Get all findings with full audit context."""
         exclude_categories = exclude_categories or []
