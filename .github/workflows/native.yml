@@ -92,7 +92,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
-    
+    defaults:
+      run:
+        working-directory: .
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
