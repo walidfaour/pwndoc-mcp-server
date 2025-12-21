@@ -260,7 +260,8 @@ class PwnDocClient:
             "Accept": "application/json",
         }
         if self._token:
-            headers["Authorization"] = f"Bearer {self._token}"
+            # PwnDoc expects JWT token in Cookie header
+            headers["Cookie"] = f"token=JWT {self._token}"
         return headers
 
     def authenticate(self) -> bool:
