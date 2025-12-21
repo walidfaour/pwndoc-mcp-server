@@ -539,7 +539,7 @@ class PwnDocMCPServer:
     # TOOL HANDLERS
     # =========================================================================
 
-    def _handle_list_audits(self, finding_title: Optional[str] = None) -> Dict:
+    def _handle_list_audits(self, finding_title: Optional[str] = None) -> List[Dict]:
         return self.client.list_audits(finding_title)
 
     def _handle_get_audit(self, audit_id: str) -> Dict:
@@ -652,8 +652,9 @@ class PwnDocMCPServer:
         Returns:
             List of tool definitions
         """
+        from typing import cast
         result = self._handle_list_tools({})
-        return result.get("tools", [])
+        return cast(List[Dict], result.get("tools", []))
 
     async def handle_call_tool(self, name: str, arguments: Dict) -> Any:
         """
