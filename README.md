@@ -39,14 +39,17 @@ PwnDoc MCP Server enables AI assistants to interact with your PwnDoc penetration
 
 ## ✨ Features
 
-- 🔌 **89 MCP Tools** - Complete coverage of PwnDoc API
+- 🔌 **90 MCP Tools** - Complete coverage of PwnDoc API (all endpoints)
 - 🔐 **Secure Authentication** - JWT tokens with auto-refresh
-- ⚡ **Rate Limiting** - Built-in protection for API limits
+- ⚡ **Rate Limiting** - Built-in sliding window rate limiter
+- 🔄 **Automatic Retries** - Exponential backoff for failed requests
 - 📊 **Comprehensive Logging** - Debug, file, and JSON logging
 - 🌍 **Cross-Platform** - Linux, macOS, Windows support
 - 🐳 **Docker Ready** - Pre-built container images
 - 📦 **Multiple Installation Methods** - pip, apt, yum, binaries
 - 🚀 **Native Binary** - Optional C++ implementation for portability
+- 🎯 **Type Safety** - Full mypy type checking (zero errors)
+- ✅ **Well Tested** - 111 tests, 100% quality checks passing
 
 ## 📥 Installation
 
@@ -371,31 +374,59 @@ docker run -it --rm \
   ghcr.io/walidfaour/pwndoc-mcp-server:latest
 ```
 
-## 🔧 Available Tools (89)
+## 🔧 Available Tools (90)
 
-### Audits (15 tools)
-`list_audits` `get_audit` `create_audit` `update_audit` `delete_audit` `get_audit_types` `create_audit_type` `update_audit_type` `delete_audit_type` `generate_audit_report` `get_audit_network` `update_audit_network` `sort_audit_findings` `update_audit_sorting` `move_audit_finding`
+**Complete coverage of PwnDoc API** - All 92 endpoints exposed as MCP tools (minus 2 internal auth endpoints)
 
-### Findings (12 tools)
-`list_findings` `get_finding` `create_finding` `update_finding` `delete_finding` `search_findings` `get_finding_categories` `create_finding_category` `update_finding_category` `delete_finding_category` `import_findings` `export_findings`
+### Audits (13 tools)
+- `list_audits` `get_audit` `create_audit` `update_audit_general` `delete_audit`
+- `get_audit_general` `get_audit_network` `update_audit_network`
+- `get_audit_sections` `update_audit_sections`
+- `toggle_audit_approval` `update_review_status` `generate_audit_report`
 
-### Vulnerabilities (8 tools)
-`list_vulnerabilities` `get_vulnerability` `create_vulnerability` `update_vulnerability` `delete_vulnerability` `merge_vulnerability` `get_vulnerability_updates` `import_vulnerabilities`
+### Findings (9 tools)
+- `get_audit_findings` `get_finding` `create_finding` `update_finding` `delete_finding`
+- `sort_findings` `move_finding` `search_findings`
+- `get_all_findings_with_context` (comprehensive: extracts CWE, OWASP, strips HTML, full team info)
 
-### Clients & Companies (12 tools)
-`list_clients` `get_client` `create_client` `update_client` `delete_client` `get_client_audits` `list_companies` `get_company` `create_company` `update_company` `delete_company` `get_company_stats`
+### Vulnerability Templates (9 tools)
+- `list_vulnerabilities` `get_vulnerabilities_by_locale` `create_vulnerability` `update_vulnerability` `delete_vulnerability`
+- `bulk_delete_vulnerabilities` `export_vulnerabilities` `create_vulnerability_from_finding`
+- `get_vulnerability_updates` `merge_vulnerability`
 
-### Users & Settings (16 tools)
-`list_users` `get_user` `create_user` `update_user` `delete_user` `get_current_user` `update_current_user` `change_password` `get_settings` `update_settings` `get_reviews` `export_reviews` `list_languages` `create_language` `update_language` `delete_language`
+### Clients & Companies (8 tools)
+- `list_clients` `create_client` `update_client` `delete_client`
+- `list_companies` `create_company` `update_company` `delete_company`
 
-### Templates (10 tools)
-`list_templates` `get_template` `create_template` `update_template` `delete_template` `list_sections` `create_section` `update_section` `delete_section` `get_custom_fields`
+### Users & Authentication (11 tools)
+- `list_users` `get_user` `get_current_user` `create_user` `update_user` `update_current_user`
+- `list_reviewers`
+- `get_totp_status` `setup_totp` `disable_totp` (2FA/TOTP support)
 
-### Images & Data (10 tools)
-`upload_image` `get_image` `download_image` `delete_image` `get_statistics` `get_cvss_scores` `backup_data` `restore_data` `export_data` `import_data`
+### Data Types & Configuration (22 tools)
+**Languages** (4): `list_languages` `create_language` `update_language` `delete_language`
 
-### Collaboration (6 tools)
-`list_comments` `create_comment` `update_comment` `delete_comment` `get_audit_history` `get_finding_history`
+**Audit Types** (4): `list_audit_types` `create_audit_type` `update_audit_type` `delete_audit_type`
+
+**Vulnerability Types** (4): `list_vulnerability_types` `create_vulnerability_type` `update_vulnerability_type` `delete_vulnerability_type`
+
+**Vulnerability Categories** (4): `list_vulnerability_categories` `create_vulnerability_category` `update_vulnerability_category` `delete_vulnerability_category`
+
+**Sections** (4): `list_sections` `create_section` `update_section` `delete_section`
+
+**Custom Fields** (4): `list_custom_fields` `create_custom_field` `update_custom_field` `delete_custom_field`
+
+### Settings & Templates (10 tools)
+- `get_settings` `get_public_settings` `update_settings` `export_settings` `import_settings`
+- `list_templates` `create_template` `update_template` `delete_template` `download_template`
+
+### Images (4 tools)
+- `get_image` `download_image` `upload_image` `delete_image`
+
+### Statistics & Metadata (4 tools)
+- `get_statistics` `list_roles`
+
+> 💡 **Tip:** Use `pwndoc-mcp tools` to list all available tools with descriptions
 
 [Full tool documentation →](https://walidfaour.github.io/pwndoc-mcp-server/tools)
 
