@@ -8,9 +8,9 @@ import logging
 import time
 from collections import deque
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
-import httpx
+import httpx  # type: ignore[import-not-found]
 
 from .config import Config
 
@@ -41,8 +41,8 @@ class RateLimiter:
     def wait_time(self) -> float:
         """Time to wait before next request is available."""
         if len(self.requests) < self.max_requests:
-            return 0
-        return self.requests[0] + self.period - time.time()
+            return 0.0
+        return float(self.requests[0]) + self.period - time.time()
 
 
 class PwnDocError(Exception):
@@ -376,7 +376,7 @@ class PwnDocClient:
                 # Handle response
                 if response.status_code == 200:
                     try:
-                        return response.json()
+                        return cast(Dict[str, Any], response.json())
                     except Exception:
                         return {"raw": response.text}
                 elif response.status_code == 401:
