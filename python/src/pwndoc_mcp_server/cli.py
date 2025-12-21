@@ -41,6 +41,12 @@ from pwndoc_mcp_server.config import (
     load_config,
     save_config,
 )
+from pwndoc_mcp_server.mcp_installer import (
+    get_claude_config_path,
+    install_mcp_config,
+    show_mcp_config,
+    uninstall_mcp_config,
+)
 from pwndoc_mcp_server.server import PwnDocMCPServer
 
 # Create CLI app
@@ -366,6 +372,102 @@ if HAS_RICH:
 
         console.print(table)
         console.print(f"\nTotal: [cyan]{len(server._tools)}[/cyan] tools")
+
+    # =============================================================================
+    # MCP CLAUDE INTEGRATION COMMANDS
+    # =============================================================================
+
+    @app.command()
+    def claude_install(
+        force: bool = typer.Option(False, "--force", "-f", help="Overwrite existing configuration"),
+        env_file: Optional[str] = typer.Option(None, "--env-file", help="Path to .env file with credentials"),
+    ):
+        """Install PwnDoc MCP server for Claude Desktop."""
+        try:
+            console.print("\n[cyan]Installing PwnDoc MCP for Claude Desktop...[/cyan]\n")
+
+            # Build environment variables from config if needed
+            env_vars = {}
+            config = load_config()
+            if config.url:
+                env_vars["PWNDOC_URL"] = config.url
+            if config.username:
+                env_vars["PWNDOC_USERNAME"] = config.username
+            if config.password:
+                env_vars["PWNDOC_PASSWORD"] = config.password
+            if config.token:
+                env_vars["PWNDOC_TOKEN"] = config.token
+
+            # Install configuration
+            success = install_mcp_config(env=env_vars if env_vars else None, force=force)
+
+            if success:
+                config_path = get_claude_config_path()
+                console.print(Panel(
+                    f"[green]✓[/green] PwnDoc MCP installed successfully!\n\n"
+                    f"Config file: [cyan]{config_path}[/cyan]\n\n"
+                    f"[yellow]Next steps:[/yellow]\n"
+                    f"1. Restart Claude Desktop\n"
+                    f"2. PwnDoc tools will be available in Claude",
+                    title="Installation Complete",
+                    border_style="green"
+                ))
+            else:
+                console.print("[yellow]Already installed (use --force to overwrite)[/yellow]")
+
+        except Exception as e:
+            console.print(f"[red]✗ Installation failed: {e}[/red]")
+            raise typer.Exit(1)
+
+    @app.command()
+    def claude_uninstall():
+        """Remove PwnDoc MCP server from Claude Desktop."""
+        try:
+            console.print("\n[cyan]Uninstalling PwnDoc MCP from Claude Desktop...[/cyan]\n")
+
+            success = uninstall_mcp_config()
+
+            if success:
+                console.print(Panel(
+                    "[green]✓[/green] PwnDoc MCP uninstalled successfully!\n\n"
+                    "[yellow]Restart Claude Desktop to apply changes.[/yellow]",
+                    title="Uninstallation Complete",
+                    border_style="green"
+                ))
+            else:
+                console.print("[yellow]Not installed[/yellow]")
+
+        except Exception as e:
+            console.print(f"[red]✗ Uninstallation failed: {e}[/red]")
+            raise typer.Exit(1)
+
+    @app.command()
+    def claude_status():
+        """Show Claude Desktop MCP configuration status."""
+        try:
+            config_path = get_claude_config_path()
+            console.print(f"\nClaude config path: [cyan]{config_path}[/cyan]")
+
+            if not config_path.exists():
+                console.print("[yellow]Claude configuration file not found[/yellow]")
+                console.print("Have you installed Claude Desktop?")
+                return
+
+            mcp_config = show_mcp_config()
+
+            if mcp_config:
+                console.print("\n[green]✓[/green] PwnDoc MCP is installed\n")
+
+                # Display configuration
+                syntax = Syntax(json.dumps({"pwndoc-mcp": mcp_config}, indent=2), "json", theme="monokai")
+                console.print(syntax)
+            else:
+                console.print("\n[yellow]PwnDoc MCP is not installed[/yellow]")
+                console.print("\nRun [cyan]pwndoc-mcp claude-install[/cyan] to install")
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise typer.Exit(1)
 
 
 # =============================================================================

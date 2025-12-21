@@ -30,6 +30,19 @@ pwndoc-mcp --version
 pwndoc-mcp --help
 ```
 
+### Kali Linux Installation
+
+If you encounter errors on Kali Linux, use a virtual environment:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install pwndoc-mcp-server
+```
+
 ## Docker
 
 Pull the official image:
