@@ -17,6 +17,7 @@ from pwndoc_mcp_server.client import (
 )
 from pwndoc_mcp_server.config import (
     Config,
+    get_config_path,
     init_config_interactive,
     load_config,
     save_config,
@@ -29,9 +30,10 @@ __all__ = [
     "__version__",
     # Config
     "Config",
+    "get_config_path",
+    "init_config_interactive",
     "load_config",
     "save_config",
-    "init_config_interactive",
     # Client
     "PwnDocClient",
     "PwnDocError",

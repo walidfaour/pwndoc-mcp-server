@@ -42,7 +42,7 @@ class Config:
     url: str = ""
     username: str = ""
     password: str = ""
-    token: Optional[str] = None
+    token: str = ""
 
     # SSL and network settings
     verify_ssl: bool = True
@@ -108,13 +108,18 @@ class Config:
             return "credentials"
         return "none"
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert config to dictionary (excluding sensitive data)."""
-        return {
+    def to_dict(self, include_secrets: bool = False) -> Dict[str, Any]:
+        """Convert config to dictionary.
+
+        Args:
+            include_secrets: If True, include passwords and tokens
+
+        Returns:
+            Dictionary representation of config
+        """
+        d = {
             "url": self.url,
             "username": self.username,
-            "has_password": bool(self.password),
-            "has_token": bool(self.token),
             "verify_ssl": self.verify_ssl,
             "timeout": self.timeout,
             "log_level": self.log_level,
@@ -122,12 +127,60 @@ class Config:
             "auth_method": self.auth_method,
         }
 
+        if include_secrets:
+            d["password"] = self.password
+            d["token"] = self.token
+        else:
+            d["has_password"] = bool(self.password)
+            d["has_token"] = bool(self.token)
+
+        return d
+
     def to_safe_string(self) -> str:
         """Return string representation without sensitive data."""
         return (
             f"Config(url={self.url!r}, username={self.username!r}, "
             f"auth_method={self.auth_method!r}, verify_ssl={self.verify_ssl})"
         )
+
+    def validate(self) -> list:
+        """Validate configuration and return list of errors.
+
+        Returns:
+            List of error messages, empty if valid
+        """
+        errors = []
+
+        if not self.url:
+            errors.append("URL is required")
+        elif not self.url.startswith(("http://", "https://")):
+            errors.append(f"Invalid URL format: {self.url}")
+
+        if not self.token and not (self.username and self.password):
+            errors.append("Authentication required: provide either token or username/password")
+
+        if self.timeout < 1:
+            errors.append(f"Timeout must be positive: {self.timeout}")
+
+        return errors
+
+    def is_valid(self) -> bool:
+        """Check if configuration is valid.
+
+        Returns:
+            True if configuration is valid
+        """
+        return len(self.validate()) == 0
+
+    @classmethod
+    def from_env(cls) -> "Config":
+        """Create Config from environment variables.
+
+        Returns:
+            Config object populated from environment
+        """
+        env_config = _load_from_env()
+        return cls(**env_config)
 
 
 def _load_from_env() -> Dict[str, Any]:
@@ -248,6 +301,8 @@ def save_config(config: Config, config_file: Optional[Path] = None) -> Path:
     """
     if config_file is None:
         config_file = DEFAULT_CONFIG_FILE
+    elif isinstance(config_file, str):
+        config_file = Path(config_file)
 
     # Ensure directory exists
     config_file.parent.mkdir(parents=True, exist_ok=True)
@@ -276,6 +331,22 @@ def save_config(config: Config, config_file: Optional[Path] = None) -> Path:
 
     logger.info(f"Configuration saved to {config_file}")
     return config_file
+
+
+def get_config_path() -> Path:
+    """
+    Get the path to the configuration file.
+
+    Checks PWNDOC_CONFIG_FILE environment variable first,
+    then returns the default path.
+
+    Returns:
+        Path to configuration file
+    """
+    config_path_env = os.getenv("PWNDOC_CONFIG_FILE")
+    if config_path_env:
+        return Path(config_path_env).expanduser()
+    return DEFAULT_CONFIG_FILE
 
 
 def init_config_interactive() -> Config:
