@@ -211,7 +211,10 @@ def setup_logging(
 
     root_logger.setLevel(getattr(logging, level.upper()))
 
-    # Clear existing handlers
+    # Clear existing handlers (close them first to avoid resource warnings)
+    for handler in root_logger.handlers[:]:
+        handler.close()
+        root_logger.removeHandler(handler)
     root_logger.handlers = []
 
     # Select format
