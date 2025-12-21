@@ -9,9 +9,8 @@ import tempfile
 from pathlib import Path
 
 from pwndoc_mcp_server.logging_config import (
-    setup_logging,
     get_logger,
-    LogLevel,
+    setup_logging,
 )
 
 

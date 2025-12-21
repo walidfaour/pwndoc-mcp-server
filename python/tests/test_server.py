@@ -6,11 +6,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from pwndoc_mcp_server.server import (
-    PwnDocMCPServer,
-    create_server,
-    TOOL_DEFINITIONS,
-)
+from pwndoc_mcp_server.server import PwnDocMCPServer
 from pwndoc_mcp_server.config import Config
 
 
