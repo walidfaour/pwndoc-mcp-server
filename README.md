@@ -63,6 +63,17 @@ pip install pwndoc-mcp-server[cli]
 pip install pwndoc-mcp-server[all]
 ```
 
+**Kali Linux Users:** If you encounter errors during installation, use a virtual environment:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install pwndoc-mcp-server
+```
+
 ### Native Installation
 
 Download pre-built binaries from [Releases](https://github.com/walidfaour/pwndoc-mcp-server/releases):
@@ -110,15 +121,54 @@ cmake .. && make
 
 ## ⚙️ Configuration
 
-### Environment Variables (Recommended)
+### Quick Start (Interactive Setup)
 
 ```bash
+pwndoc-mcp config init
+```
+
+The interactive wizard will guide you through configuration and support both authentication methods.
+
+### Authentication Methods
+
+You can authenticate using **environment variables**, **config file**, or **CLI arguments**.
+
+**Option 1: Username/Password (Recommended)**
+- ✅ Automatically handles token generation and refresh
+- ✅ No manual token management required
+- ✅ **Preferred** when both credentials and token are provided
+
+```bash
+# Environment variables
 export PWNDOC_URL="https://pwndoc.example.com"
 export PWNDOC_USERNAME="your-username"
 export PWNDOC_PASSWORD="your-password"
-# Or use token authentication:
-# export PWNDOC_TOKEN="your-jwt-token"
+
+# Or CLI arguments
+pwndoc-mcp serve --url https://pwndoc.example.com --username user --password pass
+pwndoc-mcp test --url https://pwndoc.example.com -u user -p pass
 ```
+
+**Option 2: Pre-authenticated Token**
+- Use if you have a JWT token
+- ⚠️ Requires manual renewal when expired
+- Only used if username/password not provided
+
+```bash
+# Environment variables
+export PWNDOC_URL="https://pwndoc.example.com"
+export PWNDOC_TOKEN="your-jwt-token"
+
+# Or CLI arguments
+pwndoc-mcp serve --url https://pwndoc.example.com --token your-jwt-token
+```
+
+**Authentication Priority:**
+When multiple methods are configured, the system uses this priority:
+1. **Username/Password** (if both provided) → automatic token refresh ✅
+2. **Token** (if username/password not provided) → manual renewal required ⚠️
+
+This means if you set all three (URL + username/password + token), it will use username/password and ignore the token.
 
 ### Configuration File
 
@@ -132,18 +182,32 @@ verify_ssl: true
 timeout: 30
 ```
 
-### Interactive Setup
-
-```bash
-pwndoc-mcp config init
-```
-
 ## 🖥️ Claude Desktop Integration
 
-Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+### Automatic Installation (Recommended)
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`  
+```bash
+# Configure your PwnDoc credentials
+pwndoc-mcp config init
+
+# Automatically install for Claude Desktop
+pwndoc-mcp claude-install
+
+# Check installation status
+pwndoc-mcp claude-status
+```
+
+This will automatically update the appropriate MCP configuration file:
+- **Linux**: `~/.config/claude/mcp_servers.json`
+- **macOS**: `~/Library/Application Support/Claude/mcp_servers.json`
+- **Windows**: `%APPDATA%\Claude\mcp_servers.json`
+
+### Manual Installation
+
+Alternatively, manually add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
 ### Using Python (pip)
@@ -213,7 +277,90 @@ pwndoc-mcp serve
 
 # Interactive config setup
 pwndoc-mcp config init
+
+# Claude Desktop integration
+pwndoc-mcp claude-install   # Install MCP config for Claude
+pwndoc-mcp claude-status    # Check installation status
+pwndoc-mcp claude-uninstall # Remove MCP config
 ```
+
+### Using with Other MCP Clients
+
+The server works with **any MCP-compatible client**, not just Claude Desktop:
+
+**stdio transport (default)** - For client integrations:
+```bash
+pwndoc-mcp serve  # Communicates via stdin/stdout
+```
+
+**SSE transport** - For web-based clients:
+```bash
+pwndoc-mcp serve --transport sse --host 0.0.0.0 --port 8080
+# Access at: http://localhost:8080/mcp
+```
+
+**Client configuration examples:**
+
+<details>
+<summary><b>Cline (VS Code)</b></summary>
+
+Add to Cline MCP settings:
+```json
+{
+  "mcpServers": {
+    "pwndoc": {
+      "command": "pwndoc-mcp",
+      "args": ["serve"],
+      "env": {
+        "PWNDOC_URL": "https://pwndoc.example.com",
+        "PWNDOC_USERNAME": "your-username",
+        "PWNDOC_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Continue.dev</b></summary>
+
+Add to Continue config:
+```json
+{
+  "mcpServers": {
+    "pwndoc": {
+      "command": "pwndoc-mcp",
+      "args": ["serve"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Custom MCP Client</b></summary>
+
+Connect to stdio transport:
+```python
+import subprocess
+process = subprocess.Popen(
+    ["pwndoc-mcp", "serve"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    env={"PWNDOC_URL": "...", "PWNDOC_USERNAME": "...", "PWNDOC_PASSWORD": "..."}
+)
+```
+
+Or use SSE transport:
+```python
+import requests
+response = requests.post(
+    "http://localhost:8080/mcp",
+    json={"method": "tools/list"}
+)
+```
+</details>
 
 ### Docker
 

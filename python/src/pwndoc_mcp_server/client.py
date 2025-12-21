@@ -267,49 +267,55 @@ class PwnDocClient:
         """
         Authenticate with PwnDoc and obtain JWT token.
 
+        Authentication priority (when multiple methods configured):
+        1. Username/Password (preferred - automatic token refresh)
+        2. Pre-configured Token (fallback - requires manual renewal)
+
         Returns:
             bool: True if authentication succeeded
 
         Raises:
             AuthenticationError: If authentication fails
         """
+        # Prefer username/password over token (automatic refresh vs manual renewal)
+        if self.config.username and self.config.password:
+            try:
+                response = self._client.post(
+                    "/api/users/login",
+                    json={
+                        "username": self.config.username,
+                        "password": self.config.password,
+                    },
+                    headers={"Content-Type": "application/json"},
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    self._token = data.get("datas", {}).get("token")
+
+                    # Extract refresh token from cookies if present
+                    if "refreshToken" in response.cookies:
+                        self._refresh_token = response.cookies["refreshToken"]
+
+                    # Set token expiry (default 1 hour)
+                    self._token_expires = datetime.now() + timedelta(hours=1)
+
+                    logger.info("Authentication successful via username/password")
+                    return True
+                else:
+                    raise AuthenticationError(
+                        f"Authentication failed: {response.status_code} - {response.text}"
+                    )
+            except httpx.RequestError as e:
+                raise AuthenticationError(f"Connection error: {e}")
+
+        # Fallback to pre-configured token if no username/password
         if self.config.token:
             self._token = self.config.token
-            logger.info("Using pre-configured token")
+            logger.info("Using pre-configured token (no automatic refresh)")
             return True
 
-        if not self.config.username or not self.config.password:
-            raise AuthenticationError("No credentials configured")
-
-        try:
-            response = self._client.post(
-                "/api/users/login",
-                json={
-                    "username": self.config.username,
-                    "password": self.config.password,
-                },
-                headers={"Content-Type": "application/json"},
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                self._token = data.get("datas", {}).get("token")
-
-                # Extract refresh token from cookies if present
-                if "refreshToken" in response.cookies:
-                    self._refresh_token = response.cookies["refreshToken"]
-
-                # Set token expiry (default 1 hour)
-                self._token_expires = datetime.now() + timedelta(hours=1)
-
-                logger.info("Authentication successful")
-                return True
-            else:
-                raise AuthenticationError(
-                    f"Authentication failed: {response.status_code} - {response.text}"
-                )
-        except httpx.RequestError as e:
-            raise AuthenticationError(f"Connection error: {e}")
+        raise AuthenticationError("No credentials configured (provide username/password or token)")
 
     def refresh_authentication(self) -> bool:
         """Refresh the authentication token."""
