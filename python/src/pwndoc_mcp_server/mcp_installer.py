@@ -22,7 +22,7 @@ def get_claude_config_path() -> Path:
     Get the Claude Desktop MCP configuration file path for the current platform.
 
     Returns:
-        Path to Claude's mcp_servers.json file
+        Path to Claude's claude_desktop_config.json file
 
     Raises:
         RuntimeError: If platform is not supported
@@ -30,12 +30,18 @@ def get_claude_config_path() -> Path:
     system = platform.system()
 
     if system == "Linux":
-        return Path.home() / ".config" / "claude" / "mcp_servers.json"
+        return Path.home() / ".config" / "Claude" / "claude_desktop_config.json"
     elif system == "Darwin":  # macOS
-        return Path.home() / "Library" / "Application Support" / "Claude" / "mcp_servers.json"
+        return (
+            Path.home()
+            / "Library"
+            / "Application Support"
+            / "Claude"
+            / "claude_desktop_config.json"
+        )
     elif system == "Windows":
         appdata = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
-        return appdata / "Claude" / "mcp_servers.json"
+        return appdata / "Claude" / "claude_desktop_config.json"
     else:
         raise RuntimeError(f"Unsupported platform: {system}")
 
@@ -44,9 +50,17 @@ def is_claude_installed() -> bool:
     """
     Check if Claude Desktop appears to be installed.
 
+    Checks for config file existence first (most reliable indicator),
+    then checks for application installation.
+
     Returns:
         True if Claude Desktop installation is detected
     """
+    # First check if config file or config directory exists (most reliable)
+    config_path = get_claude_config_path()
+    if config_path.exists() or config_path.parent.exists():
+        return True
+
     system = platform.system()
 
     if system == "Linux":
@@ -54,7 +68,6 @@ def is_claude_installed() -> bool:
         claude_paths = [
             Path.home() / ".local" / "share" / "applications" / "claude.desktop",
             Path("/usr/share/applications/claude.desktop"),
-            Path.home() / ".config" / "claude",  # Config dir exists
         ]
         return any(p.exists() for p in claude_paths)
 
@@ -63,18 +76,15 @@ def is_claude_installed() -> bool:
         app_paths = [
             Path("/Applications/Claude.app"),
             Path.home() / "Applications" / "Claude.app",
-            Path.home() / "Library" / "Application Support" / "Claude",  # Config dir
         ]
         return any(p.exists() for p in app_paths)
 
     elif system == "Windows":
         # Check for Claude in Program Files or AppData
-        appdata = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
         local_appdata = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
         claude_paths = [
             Path(os.environ.get("PROGRAMFILES", "C:\\Program Files")) / "Claude",
             local_appdata / "Programs" / "Claude",
-            appdata / "Claude",  # Config dir
         ]
         return any(p.exists() for p in claude_paths)
 
@@ -156,21 +166,28 @@ def load_existing_config(config_path: Path) -> Dict[str, Any]:
     Load existing Claude MCP configuration.
 
     Args:
-        config_path: Path to mcp_servers.json
+        config_path: Path to claude_desktop_config.json
 
     Returns:
-        Existing configuration dict or empty dict
+        Existing configuration dict with mcpServers key or empty dict
     """
     if not config_path.exists():
-        return {}
+        return {"mcpServers": {}}
 
     try:
         content = config_path.read_text()
         data = json.loads(content)
-        return dict(data) if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            return {"mcpServers": {}}
+
+        # Ensure mcpServers key exists
+        if "mcpServers" not in data:
+            data["mcpServers"] = {}
+
+        return data
     except Exception as e:
         logger.warning(f"Failed to load existing config: {e}")
-        return {}
+        return {"mcpServers": {}}
 
 
 def save_mcp_config(config: Dict[str, Any], config_path: Path, backup: bool = True) -> None:
@@ -226,15 +243,15 @@ def install_mcp_config(
         full_config = load_existing_config(config_path)
 
         # Check if pwndoc-mcp already configured
-        if "pwndoc-mcp" in full_config and not force:
+        if "pwndoc-mcp" in full_config.get("mcpServers", {}) and not force:
             logger.warning("pwndoc-mcp already configured (use --force to overwrite)")
             return False
 
         # Create pwndoc-mcp configuration
         pwndoc_config = create_mcp_config(command=command, args=args, env=env)
 
-        # Add to full configuration
-        full_config["pwndoc-mcp"] = pwndoc_config
+        # Add to mcpServers
+        full_config["mcpServers"]["pwndoc-mcp"] = pwndoc_config
 
         # Save configuration
         save_mcp_config(full_config, config_path)
@@ -262,12 +279,12 @@ def uninstall_mcp_config() -> bool:
 
         full_config = load_existing_config(config_path)
 
-        if "pwndoc-mcp" not in full_config:
+        if "pwndoc-mcp" not in full_config.get("mcpServers", {}):
             logger.info("pwndoc-mcp not configured")
             return True
 
-        # Remove pwndoc-mcp entry
-        del full_config["pwndoc-mcp"]
+        # Remove pwndoc-mcp entry from mcpServers
+        del full_config["mcpServers"]["pwndoc-mcp"]
 
         # Save updated configuration
         save_mcp_config(full_config, config_path)
@@ -295,9 +312,37 @@ def show_mcp_config() -> Optional[Dict[str, Any]]:
             return None
 
         full_config = load_existing_config(config_path)
+        mcp_servers = full_config.get("mcpServers", {})
+        pwndoc_config = mcp_servers.get("pwndoc-mcp")
 
-        return full_config.get("pwndoc-mcp")
+        if pwndoc_config is None:
+            return None
+
+        return dict(pwndoc_config) if isinstance(pwndoc_config, dict) else None
 
     except Exception as e:
         logger.error(f"Failed to read MCP configuration: {e}")
         return None
+
+
+def get_all_mcp_servers() -> Dict[str, Any]:
+    """
+    Get all MCP servers configured in Claude Desktop.
+
+    Returns:
+        Dict of all MCP servers or empty dict
+    """
+    try:
+        config_path = get_claude_config_path()
+
+        if not config_path.exists():
+            return {}
+
+        full_config = load_existing_config(config_path)
+        mcp_servers = full_config.get("mcpServers", {})
+
+        return dict(mcp_servers) if isinstance(mcp_servers, dict) else {}
+
+    except Exception as e:
+        logger.error(f"Failed to read MCP servers: {e}")
+        return {}

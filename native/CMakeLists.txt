@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
-project(pwndoc-mcp-server VERSION 2.0.0 LANGUAGES CXX)
+project(pwndoc-mcp-server VERSION 1.0.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Define version info
+add_compile_definitions(
+    PWNDOC_VERSION="${PROJECT_VERSION}"
+    PWNDOC_AUTHOR="Walid Faour"
+    PWNDOC_EMAIL="security@walidfaour.com"
+)
 
 option(BUILD_STATIC "Build static binary" OFF)
 

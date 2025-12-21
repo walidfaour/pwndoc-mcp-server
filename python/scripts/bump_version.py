@@ -8,6 +8,7 @@ Pass the version with or without a leading "v". The script updates:
 - python/pyproject.toml
 - python/src/pwndoc_mcp_server/version.py (fallback version)
 - python/src/pwndoc_mcp_server/server.py (SERVER_VERSION)
+- native/CMakeLists.txt (native executable version)
 - mcp-registry.json
 - packaging/homebrew/pwndoc-mcp-server.rb
 - packaging/scoop/pwndoc-mcp-server.json
@@ -62,6 +63,11 @@ def main() -> None:
         lambda _: f'_FALLBACK_VERSION = "{version}"',
     )
     update_file(
+        root / "native" / "CMakeLists.txt",
+        r"project\(pwndoc-mcp-server VERSION [0-9]+\.[0-9]+\.[0-9]+ LANGUAGES CXX\)",
+        lambda _: f"project(pwndoc-mcp-server VERSION {version} LANGUAGES CXX)",
+    )
+    update_file(
         root / "mcp-registry.json",
         r'"version": "[^"]+"',
         lambda _: f'"version": "{version}"',
@@ -89,11 +95,26 @@ def main() -> None:
         (root / "docs" / "user-guide" / "cli.md", r"pwndoc-mcp-server [0-9]+\.[0-9]+\.[0-9]+"),
         (root / "docs" / "user-guide" / "docker.md", r'"version": "[0-9]+\.[0-9]+\.[0-9]+"'),
         (root / "docs" / "user-guide" / "docker.md", r"`[0-9]+\.[0-9]+\.[0-9]+`"),
-        (root / "docs" / "development" / "building.md", r"pwndoc_mcp_server-[0-9]+\.[0-9]+\.[0-9]+"),
-        (root / "docs" / "development" / "building.md", r"pwndoc-mcp-server:[0-9]+\.[0-9]+\.[0-9]+"),
-        (root / "docs" / "development" / "building.md", r"pwndoc-mcp-server_[0-9]+\.[0-9]+\.[0-9]+"),
-        (root / "docs" / "getting-started" / "installation.md", r"pwndoc-mcp-server_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb"),
-        (root / "docs" / "getting-started" / "installation.md", r"pwndoc-mcp-server-[0-9]+\.[0-9]+\.[0-9]+-1\.x86_64\.rpm"),
+        (
+            root / "docs" / "development" / "building.md",
+            r"pwndoc_mcp_server-[0-9]+\.[0-9]+\.[0-9]+",
+        ),
+        (
+            root / "docs" / "development" / "building.md",
+            r"pwndoc-mcp-server:[0-9]+\.[0-9]+\.[0-9]+",
+        ),
+        (
+            root / "docs" / "development" / "building.md",
+            r"pwndoc-mcp-server_[0-9]+\.[0-9]+\.[0-9]+",
+        ),
+        (
+            root / "docs" / "getting-started" / "installation.md",
+            r"pwndoc-mcp-server_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb",
+        ),
+        (
+            root / "docs" / "getting-started" / "installation.md",
+            r"pwndoc-mcp-server-[0-9]+\.[0-9]+\.[0-9]+-1\.x86_64\.rpm",
+        ),
     ]
 
     def replace_version_literal(match: re.Match[str]) -> str:

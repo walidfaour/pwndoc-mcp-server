@@ -42,10 +42,10 @@ from pwndoc_mcp_server.config import (
     save_config,
 )
 from pwndoc_mcp_server.mcp_installer import (
+    get_all_mcp_servers,
     get_claude_config_path,
     install_mcp_config,
     is_claude_installed,
-    show_mcp_config,
     uninstall_mcp_config,
 )
 from pwndoc_mcp_server.server import PwnDocMCPServer
@@ -63,6 +63,7 @@ if HAS_RICH:
         """Callback for --version flag."""
         if value:
             console.print(f"pwndoc-mcp-server version {__version__}")
+            console.print("Author: Walid Faour <security@walidfaour.com>")
             raise typer.Exit()
 
     @app.callback()
@@ -111,6 +112,8 @@ if HAS_RICH:
             Panel(
                 f"[bold green]PwnDoc MCP Server[/bold green]\n"
                 f"Version: [cyan]{__version__}[/cyan]\n"
+                f"Author: [cyan]Walid Faour[/cyan]\n"
+                f"Email: [cyan]security@walidfaour.com[/cyan]\n"
                 f"Python: [cyan]{sys.version.split()[0]}[/cyan]",
                 title="Version Info",
             )
@@ -509,22 +512,50 @@ if HAS_RICH:
 
             if not config_path.exists():
                 console.print("[yellow]Claude configuration file not found[/yellow]")
-                console.print("Have you installed Claude Desktop?")
+                if is_claude_installed():
+                    console.print("[green]✓[/green] Claude Desktop appears to be installed")
+                    console.print("Config file will be created on first MCP installation")
+                else:
+                    console.print("[yellow]Have you installed Claude Desktop?[/yellow]")
                 return
 
-            mcp_config = show_mcp_config()
+            # Get all MCP servers
+            all_servers = get_all_mcp_servers()
+
+            if not all_servers:
+                console.print("\n[yellow]No MCP servers configured[/yellow]")
+                console.print("\nRun [cyan]pwndoc-mcp claude-install[/cyan] to install")
+                return
+
+            # Check if pwndoc-mcp is configured
+            mcp_config = all_servers.get("pwndoc-mcp")
+
+            console.print(f"\n[cyan]Found {len(all_servers)} MCP server(s) configured:[/cyan]\n")
 
             if mcp_config:
-                console.print("\n[green]✓[/green] PwnDoc MCP is installed\n")
+                console.print("[green]✓[/green] PwnDoc MCP is installed\n")
 
-                # Display configuration
+                # Display pwndoc-mcp configuration
                 syntax = Syntax(
                     json.dumps({"pwndoc-mcp": mcp_config}, indent=2), "json", theme="monokai"
                 )
                 console.print(syntax)
+
+                # Show other servers if any
+                other_servers = {k: v for k, v in all_servers.items() if k != "pwndoc-mcp"}
+                if other_servers:
+                    console.print(
+                        f"\n[dim]Other MCP servers: {', '.join(other_servers.keys())}[/dim]"
+                    )
             else:
-                console.print("\n[yellow]PwnDoc MCP is not installed[/yellow]")
-                console.print("\nRun [cyan]pwndoc-mcp claude-install[/cyan] to install")
+                console.print("[yellow]PwnDoc MCP is not installed[/yellow]\n")
+
+                # Show what IS configured
+                console.print("[cyan]Configured MCP servers:[/cyan]")
+                for server_name in all_servers.keys():
+                    console.print(f"  • {server_name}")
+
+                console.print("\nRun [cyan]pwndoc-mcp claude-install[/cyan] to install PwnDoc MCP")
 
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
