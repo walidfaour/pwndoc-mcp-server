@@ -281,7 +281,7 @@ class PwnDocClient:
         if self.config.username and self.config.password:
             try:
                 response = self._client.post(
-                    "/api/users/login",
+                    "/api/users/token",
                     json={
                         "username": self.config.username,
                         "password": self.config.password,
