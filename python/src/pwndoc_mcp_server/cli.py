@@ -71,6 +71,7 @@ if HAS_RICH:
     ):
         """PwnDoc MCP Server CLI."""
         pass
+
 else:
     app = None
     console = None

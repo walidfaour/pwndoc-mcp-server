@@ -158,7 +158,9 @@ class Config:
             errors.append(f"Invalid URL format: {self.url}")
 
         if not self.token and not (self.username and self.password):
-            errors.append("Authentication required: provide either PWNDOC_TOKEN or PWNDOC_USERNAME/PWNDOC_PASSWORD")
+            errors.append(
+                "Authentication required: provide either PWNDOC_TOKEN or PWNDOC_USERNAME/PWNDOC_PASSWORD"
+            )
 
         if self.timeout < 1:
             errors.append(f"Timeout must be positive: {self.timeout}")
