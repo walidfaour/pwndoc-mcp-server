@@ -9,10 +9,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY pyproject.toml README.md ./
-RUN pip install --no-cache-dir .
-
-# Copy source
 COPY src/ ./src/
+RUN pip install --no-cache-dir .
 
 # Create non-root user
 RUN useradd -m -u 1000 pwndoc && chown -R pwndoc:pwndoc /app
@@ -21,4 +19,6 @@ USER pwndoc
 # Environment
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["python", "-m", "pwndoc_mcp_server.server"]
+# Use CLI entrypoint (identical to pip-installed behavior)
+ENTRYPOINT ["pwndoc-mcp"]
+CMD ["serve"]
