@@ -203,6 +203,67 @@ class PwnDocMCPServer:
             handler=self._handle_generate_report,
         )
 
+        self._register_tool(
+            name="get_audit_general",
+            description="Get audit general information (dates, client, company, scope).",
+            parameters={
+                "type": "object",
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
+            },
+            handler=self._handle_get_audit_general,
+        )
+
+        self._register_tool(
+            name="get_audit_network",
+            description="Get audit network information.",
+            parameters={
+                "type": "object",
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
+            },
+            handler=self._handle_get_audit_network,
+        )
+
+        self._register_tool(
+            name="update_audit_network",
+            description="Update audit network information.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "The audit ID"},
+                    "network_data": {"type": "object", "description": "Network configuration data"},
+                },
+                "required": ["audit_id", "network_data"],
+            },
+            handler=self._handle_update_audit_network,
+        )
+
+        self._register_tool(
+            name="toggle_audit_approval",
+            description="Toggle audit approval status.",
+            parameters={
+                "type": "object",
+                "properties": {"audit_id": {"type": "string", "description": "The audit ID"}},
+                "required": ["audit_id"],
+            },
+            handler=self._handle_toggle_audit_approval,
+        )
+
+        self._register_tool(
+            name="update_review_status",
+            description="Update audit ready-for-review status.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "The audit ID"},
+                    "state": {"type": "boolean", "description": "Ready for review state"},
+                },
+                "required": ["audit_id", "state"],
+            },
+            handler=self._handle_update_review_status,
+        )
+
         # =====================================================================
         # FINDING TOOLS
         # =====================================================================
@@ -337,6 +398,42 @@ class PwnDocMCPServer:
             handler=self._handle_get_all_findings_with_context,
         )
 
+        self._register_tool(
+            name="sort_findings",
+            description="Reorder findings within an audit.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "The audit ID"},
+                    "finding_order": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Ordered array of finding IDs",
+                    },
+                },
+                "required": ["audit_id", "finding_order"],
+            },
+            handler=self._handle_sort_findings,
+        )
+
+        self._register_tool(
+            name="move_finding",
+            description="Move a finding from one audit to another.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "Source audit ID"},
+                    "finding_id": {"type": "string", "description": "Finding ID to move"},
+                    "destination_audit_id": {
+                        "type": "string",
+                        "description": "Destination audit ID",
+                    },
+                },
+                "required": ["audit_id", "finding_id", "destination_audit_id"],
+            },
+            handler=self._handle_move_finding,
+        )
+
         # =====================================================================
         # CLIENT & COMPANY TOOLS
         # =====================================================================
@@ -422,6 +519,35 @@ class PwnDocMCPServer:
             handler=self._handle_create_company,
         )
 
+        self._register_tool(
+            name="update_company",
+            description="Update an existing company.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "company_id": {"type": "string", "description": "Company ID"},
+                    "name": {"type": "string", "description": "Company name"},
+                    "short_name": {"type": "string", "description": "Short name/abbreviation"},
+                    "logo": {"type": "string", "description": "Logo (base64)"},
+                },
+                "required": ["company_id"],
+            },
+            handler=self._handle_update_company,
+        )
+
+        self._register_tool(
+            name="delete_company",
+            description="Delete a company.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "company_id": {"type": "string", "description": "Company ID to delete"}
+                },
+                "required": ["company_id"],
+            },
+            handler=self._handle_delete_company,
+        )
+
         # =====================================================================
         # VULNERABILITY TEMPLATE TOOLS
         # =====================================================================
@@ -469,6 +595,82 @@ class PwnDocMCPServer:
             handler=self._handle_create_vulnerability,
         )
 
+        self._register_tool(
+            name="update_vulnerability",
+            description="Update an existing vulnerability template.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_id": {"type": "string", "description": "Vulnerability template ID"},
+                    "details": {"type": "object", "description": "Vulnerability details by locale"},
+                    "cvssv3": {"type": "string", "description": "CVSS v3 score"},
+                    "priority": {"type": "integer", "description": "Priority (1-4)"},
+                    "remediation_complexity": {
+                        "type": "integer",
+                        "description": "Complexity (1-3)",
+                    },
+                    "category": {"type": "string", "description": "Category"},
+                },
+                "required": ["vuln_id"],
+            },
+            handler=self._handle_update_vulnerability,
+        )
+
+        self._register_tool(
+            name="delete_vulnerability",
+            description="Delete a vulnerability template.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_id": {
+                        "type": "string",
+                        "description": "Vulnerability template ID to delete",
+                    }
+                },
+                "required": ["vuln_id"],
+            },
+            handler=self._handle_delete_vulnerability,
+        )
+
+        self._register_tool(
+            name="bulk_delete_vulnerabilities",
+            description="Delete multiple vulnerability templates at once.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "vuln_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Array of vulnerability template IDs to delete",
+                    }
+                },
+                "required": ["vuln_ids"],
+            },
+            handler=self._handle_bulk_delete_vulnerabilities,
+        )
+
+        self._register_tool(
+            name="export_vulnerabilities",
+            description="Export all vulnerability templates.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_export_vulnerabilities,
+        )
+
+        self._register_tool(
+            name="create_vulnerability_from_finding",
+            description="Create a vulnerability template from an existing finding.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "Audit ID"},
+                    "finding_id": {"type": "string", "description": "Finding ID"},
+                    "locale": {"type": "string", "description": "Language code (e.g., 'en')"},
+                },
+                "required": ["audit_id", "finding_id"],
+            },
+            handler=self._handle_create_vulnerability_from_finding,
+        )
+
         # =====================================================================
         # USER TOOLS
         # =====================================================================
@@ -487,6 +689,75 @@ class PwnDocMCPServer:
             handler=self._handle_get_current_user,
         )
 
+        self._register_tool(
+            name="get_user",
+            description="Get user information by username.",
+            parameters={
+                "type": "object",
+                "properties": {"username": {"type": "string", "description": "Username"}},
+                "required": ["username"],
+            },
+            handler=self._handle_get_user,
+        )
+
+        self._register_tool(
+            name="create_user",
+            description="Create a new user (admin only).",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "username": {"type": "string", "description": "Username"},
+                    "password": {"type": "string", "description": "Password"},
+                    "firstname": {"type": "string", "description": "First name"},
+                    "lastname": {"type": "string", "description": "Last name"},
+                    "email": {"type": "string", "description": "Email address"},
+                    "role": {"type": "string", "description": "User role"},
+                },
+                "required": ["username", "password", "firstname", "lastname", "email", "role"],
+            },
+            handler=self._handle_create_user,
+        )
+
+        self._register_tool(
+            name="update_user",
+            description="Update a user (admin only).",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "user_id": {"type": "string", "description": "User ID"},
+                    "username": {"type": "string", "description": "Username"},
+                    "firstname": {"type": "string", "description": "First name"},
+                    "lastname": {"type": "string", "description": "Last name"},
+                    "email": {"type": "string", "description": "Email address"},
+                    "role": {"type": "string", "description": "User role"},
+                },
+                "required": ["user_id"],
+            },
+            handler=self._handle_update_user,
+        )
+
+        self._register_tool(
+            name="update_current_user",
+            description="Update current user's profile.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "firstname": {"type": "string", "description": "First name"},
+                    "lastname": {"type": "string", "description": "Last name"},
+                    "email": {"type": "string", "description": "Email address"},
+                    "password": {"type": "string", "description": "New password"},
+                },
+            },
+            handler=self._handle_update_current_user,
+        )
+
+        self._register_tool(
+            name="list_reviewers",
+            description="List all users with reviewer role.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_reviewers,
+        )
+
         # =====================================================================
         # SETTINGS & DATA TOOLS
         # =====================================================================
@@ -496,6 +767,94 @@ class PwnDocMCPServer:
             description="List all report templates.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_templates,
+        )
+
+        self._register_tool(
+            name="create_template",
+            description="Create/upload a report template.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Template name"},
+                    "ext": {"type": "string", "description": "File extension (e.g., 'docx')"},
+                    "file_content": {
+                        "type": "string",
+                        "description": "Base64-encoded file content",
+                    },
+                },
+                "required": ["name", "ext", "file_content"],
+            },
+            handler=self._handle_create_template,
+        )
+
+        self._register_tool(
+            name="update_template",
+            description="Update an existing template.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "template_id": {"type": "string", "description": "Template ID"},
+                    "name": {"type": "string", "description": "Template name"},
+                    "ext": {"type": "string", "description": "File extension"},
+                    "file_content": {
+                        "type": "string",
+                        "description": "Base64-encoded file content",
+                    },
+                },
+                "required": ["template_id"],
+            },
+            handler=self._handle_update_template,
+        )
+
+        self._register_tool(
+            name="delete_template",
+            description="Delete a report template.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "template_id": {"type": "string", "description": "Template ID to delete"}
+                },
+                "required": ["template_id"],
+            },
+            handler=self._handle_delete_template,
+        )
+
+        self._register_tool(
+            name="download_template",
+            description="Download a template file.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "template_id": {"type": "string", "description": "Template ID to download"}
+                },
+                "required": ["template_id"],
+            },
+            handler=self._handle_download_template,
+        )
+
+        self._register_tool(
+            name="get_settings",
+            description="Get system settings.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_get_settings,
+        )
+
+        self._register_tool(
+            name="get_public_settings",
+            description="Get public settings (no authentication required).",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_get_public_settings,
+        )
+
+        self._register_tool(
+            name="update_settings",
+            description="Update system settings (admin only).",
+            parameters={
+                "type": "object",
+                "properties": {"settings": {"type": "object", "description": "Settings to update"}},
+                "required": ["settings"],
+            },
+            handler=self._handle_update_settings,
         )
 
         self._register_tool(
@@ -511,6 +870,99 @@ class PwnDocMCPServer:
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_audit_types,
         )
+
+        self._register_tool(
+            name="list_vulnerability_types",
+            description="List all vulnerability types.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_vulnerability_types,
+        )
+
+        self._register_tool(
+            name="list_vulnerability_categories",
+            description="List all vulnerability categories.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_vulnerability_categories,
+        )
+
+        self._register_tool(
+            name="list_sections",
+            description="List all section definitions.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_sections,
+        )
+
+        self._register_tool(
+            name="list_custom_fields",
+            description="List all custom field definitions.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_custom_fields,
+        )
+
+        self._register_tool(
+            name="list_roles",
+            description="List all user roles.",
+            parameters={"type": "object", "properties": {}},
+            handler=self._handle_list_roles,
+        )
+
+        # =====================================================================
+        # IMAGE TOOLS
+        # =====================================================================
+
+        self._register_tool(
+            name="get_image",
+            description="Get image metadata.",
+            parameters={
+                "type": "object",
+                "properties": {"image_id": {"type": "string", "description": "Image ID"}},
+                "required": ["image_id"],
+            },
+            handler=self._handle_get_image,
+        )
+
+        self._register_tool(
+            name="download_image",
+            description="Download an image file.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "image_id": {"type": "string", "description": "Image ID to download"}
+                },
+                "required": ["image_id"],
+            },
+            handler=self._handle_download_image,
+        )
+
+        self._register_tool(
+            name="upload_image",
+            description="Upload an image to an audit.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "audit_id": {"type": "string", "description": "Audit ID"},
+                    "name": {"type": "string", "description": "Image name"},
+                    "value": {"type": "string", "description": "Base64-encoded image data"},
+                },
+                "required": ["audit_id", "name", "value"],
+            },
+            handler=self._handle_upload_image,
+        )
+
+        self._register_tool(
+            name="delete_image",
+            description="Delete an image.",
+            parameters={
+                "type": "object",
+                "properties": {"image_id": {"type": "string", "description": "Image ID to delete"}},
+                "required": ["image_id"],
+            },
+            handler=self._handle_delete_image,
+        )
+
+        # =====================================================================
+        # STATISTICS
+        # =====================================================================
 
         self._register_tool(
             name="get_statistics",
@@ -629,6 +1081,129 @@ class PwnDocMCPServer:
 
     def _handle_get_statistics(self) -> Dict:
         return self.client.get_statistics()
+
+    # Audit handlers
+    def _handle_get_audit_general(self, audit_id: str) -> Dict:
+        return self.client.get_audit_general(audit_id)
+
+    def _handle_get_audit_network(self, audit_id: str) -> Dict:
+        return self.client.get_audit_network(audit_id)
+
+    def _handle_update_audit_network(self, audit_id: str, network_data: Dict) -> Dict:
+        return self.client.update_audit_network(audit_id, network_data)
+
+    def _handle_toggle_audit_approval(self, audit_id: str) -> Dict:
+        return self.client.toggle_audit_approval(audit_id)
+
+    def _handle_update_review_status(self, audit_id: str, state: bool) -> Dict:
+        return self.client.update_review_status(audit_id, state)
+
+    # Finding handlers
+    def _handle_sort_findings(self, audit_id: str, finding_order: List[str]) -> Dict:
+        return self.client.sort_findings(audit_id, finding_order)
+
+    def _handle_move_finding(
+        self, audit_id: str, finding_id: str, destination_audit_id: str
+    ) -> Dict:
+        return self.client.move_finding(audit_id, finding_id, destination_audit_id)
+
+    # Company handlers
+    def _handle_update_company(self, company_id: str, **kwargs) -> Dict:
+        return self.client.update_company(company_id, **kwargs)
+
+    def _handle_delete_company(self, company_id: str) -> Dict:
+        self.client.delete_company(company_id)
+        return {"success": True, "message": f"Company {company_id} deleted"}
+
+    # Vulnerability handlers
+    def _handle_update_vulnerability(self, vuln_id: str, **kwargs) -> Dict:
+        return self.client.update_vulnerability(vuln_id, **kwargs)
+
+    def _handle_delete_vulnerability(self, vuln_id: str) -> Dict:
+        self.client.delete_vulnerability(vuln_id)
+        return {"success": True, "message": f"Vulnerability {vuln_id} deleted"}
+
+    def _handle_bulk_delete_vulnerabilities(self, vuln_ids: List[str]) -> Dict:
+        self.client.bulk_delete_vulnerabilities(vuln_ids)
+        return {"success": True, "message": f"Deleted {len(vuln_ids)} vulnerabilities"}
+
+    def _handle_export_vulnerabilities(self) -> Dict:
+        return self.client.export_vulnerabilities()
+
+    def _handle_create_vulnerability_from_finding(self, **kwargs) -> Dict:
+        return self.client.create_vulnerability_from_finding(**kwargs)
+
+    # User handlers
+    def _handle_get_user(self, username: str) -> Dict:
+        return self.client.get_user(username)
+
+    def _handle_create_user(self, **kwargs) -> Dict:
+        return self.client.create_user(**kwargs)
+
+    def _handle_update_user(self, user_id: str, **kwargs) -> Dict:
+        return self.client.update_user(user_id, **kwargs)
+
+    def _handle_update_current_user(self, **kwargs) -> Dict:
+        return self.client.update_current_user(**kwargs)
+
+    def _handle_list_reviewers(self) -> List[Dict]:
+        return self.client.list_reviewers()
+
+    # Template handlers
+    def _handle_create_template(self, name: str, ext: str, file_content: str) -> Dict:
+        return self.client.create_template(name, ext, file_content)
+
+    def _handle_update_template(self, template_id: str, **kwargs) -> Dict:
+        return self.client.update_template(template_id, **kwargs)
+
+    def _handle_delete_template(self, template_id: str) -> Dict:
+        self.client.delete_template(template_id)
+        return {"success": True, "message": f"Template {template_id} deleted"}
+
+    def _handle_download_template(self, template_id: str) -> Dict:
+        content = self.client.download_template(template_id)
+        return {"success": True, "size_bytes": len(content)}
+
+    # Settings handlers
+    def _handle_get_settings(self) -> Dict:
+        return self.client.get_settings()
+
+    def _handle_get_public_settings(self) -> Dict:
+        return self.client.get_public_settings()
+
+    def _handle_update_settings(self, settings: Dict) -> Dict:
+        return self.client.update_settings(settings)
+
+    # Data type handlers
+    def _handle_list_vulnerability_types(self) -> List[Dict]:
+        return self.client.list_vulnerability_types()
+
+    def _handle_list_vulnerability_categories(self) -> List[Dict]:
+        return self.client.list_vulnerability_categories()
+
+    def _handle_list_sections(self) -> List[Dict]:
+        return self.client.list_sections()
+
+    def _handle_list_custom_fields(self) -> List[Dict]:
+        return self.client.list_custom_fields()
+
+    def _handle_list_roles(self) -> List[Dict]:
+        return self.client.list_roles()
+
+    # Image handlers
+    def _handle_get_image(self, image_id: str) -> Dict:
+        return self.client.get_image(image_id)
+
+    def _handle_download_image(self, image_id: str) -> Dict:
+        content = self.client.download_image(image_id)
+        return {"success": True, "size_bytes": len(content)}
+
+    def _handle_upload_image(self, audit_id: str, name: str, value: str) -> Dict:
+        return self.client.upload_image(audit_id, name, value)
+
+    def _handle_delete_image(self, image_id: str) -> Dict:
+        self.client.delete_image(image_id)
+        return {"success": True, "message": f"Image {image_id} deleted"}
 
     # =========================================================================
     # PUBLIC API METHODS (for testing and direct use)
