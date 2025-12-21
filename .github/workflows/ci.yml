@@ -140,20 +140,21 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: [build-package]
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Skip PyPI upload for v1.0.0 (already published)
+    if: startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/tags/v1.0.0'
     environment:
       name: pypi
       url: https://pypi.org/project/pwndoc-mcp-server/
     permissions:
       id-token: write
-    
+
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: python-package
           path: dist/
-      
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
