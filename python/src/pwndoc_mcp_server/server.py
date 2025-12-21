@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from .client import PwnDocClient, PwnDocError
 from .config import Config, load_config
+from .version import get_version
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class PwnDocMCPServer:
     """
 
     SERVER_NAME = "pwndoc-mcp-server"
-    SERVER_VERSION = "1.0.0"
+    SERVER_VERSION = get_version()
     PROTOCOL_VERSION = "2024-11-05"
 
     def __init__(self, config: Optional[Config] = None, transport: Optional[str] = None):
