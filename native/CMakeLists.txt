@@ -47,7 +47,13 @@ target_link_libraries(pwndoc-mcp-server PRIVATE
 # Static linking
 if(BUILD_STATIC)
     if(UNIX AND NOT APPLE)
+        # Linux: static libgcc and libstdc++
         target_link_options(pwndoc-mcp-server PRIVATE -static-libgcc -static-libstdc++)
+    elseif(WIN32)
+        # Windows: link runtime statically
+        set_property(TARGET pwndoc-mcp-server PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+        # Use static CURL on Windows
+        set(CURL_STATICLIB ON)
     endif()
 endif()
 
