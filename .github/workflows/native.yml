@@ -39,7 +39,16 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
+
+      - name: Fetch updated tag (if release)
+        if: github.event_name == 'release'
+        run: |
+          git fetch --tags --force
+          git checkout ${{ github.event.release.tag_name }}
+        working-directory: .
+
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
