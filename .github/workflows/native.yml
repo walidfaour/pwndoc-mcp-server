@@ -63,19 +63,21 @@ jobs:
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          vcpkg install curl:x64-windows nlohmann-json:x64-windows
-      
+          vcpkg install curl:x64-windows-static nlohmann-json:x64-windows-static
+
       - name: Configure (Unix)
         if: runner.os != 'Windows'
         run: |
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON
-      
+
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+        env:
+          VCPKG_DEFAULT_TRIPLET: x64-windows-static
       
       - name: Build
         run: cmake --build build --config Release
