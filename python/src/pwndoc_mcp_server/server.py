@@ -15,7 +15,6 @@ import json
 import logging
 import sys
 from dataclasses import dataclass, field
-from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .client import PwnDocClient, PwnDocError
@@ -48,23 +47,23 @@ class MCPMessage:
 class PwnDocMCPServer:
     """
     Model Context Protocol server for PwnDoc.
-    
+
     Exposes PwnDoc API functionality as MCP tools that can be called
     by AI assistants like Claude.
-    
+
     Example:
         >>> server = PwnDocMCPServer(config)
         >>> server.run()  # Starts stdio transport
     """
-    
+
     SERVER_NAME = "pwndoc-mcp-server"
     SERVER_VERSION = "1.0.0"
     PROTOCOL_VERSION = "2024-11-05"
-    
+
     def __init__(self, config: Optional[Config] = None):
         """
         Initialize MCP server.
-        
+
         Args:
             config: Configuration object (loads from environment if not provided)
         """
@@ -72,12 +71,12 @@ class PwnDocMCPServer:
         self._client: Optional[PwnDocClient] = None
         self._tools: Dict[str, Tool] = {}
         self._initialized = False
-        
+
         # Register all tools
         self._register_tools()
-        
+
         logger.info(f"PwnDocMCPServer initialized with {len(self._tools)} tools")
-    
+
     @property
     def client(self) -> PwnDocClient:
         """Get or create PwnDoc client."""
@@ -85,14 +84,14 @@ class PwnDocMCPServer:
             self._client = PwnDocClient(self.config)
             self._client.authenticate()
         return self._client
-    
+
     def _register_tools(self):
         """Register all available tools."""
-        
+
         # =====================================================================
         # AUDIT TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="list_audits",
             description="List all audits/pentests. Can filter by finding title.",
@@ -107,7 +106,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_list_audits
         )
-        
+
         self._register_tool(
             name="get_audit",
             description="Get detailed information about a specific audit including all findings, scope, sections, and metadata.",
@@ -123,7 +122,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_get_audit
         )
-        
+
         self._register_tool(
             name="create_audit",
             description="Create a new audit/pentest.",
@@ -138,7 +137,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_create_audit
         )
-        
+
         self._register_tool(
             name="update_audit_general",
             description="Update general information of an audit.",
@@ -157,7 +156,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_update_audit_general
         )
-        
+
         self._register_tool(
             name="delete_audit",
             description="Delete an audit permanently.",
@@ -170,7 +169,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_delete_audit
         )
-        
+
         self._register_tool(
             name="generate_audit_report",
             description="Generate and download the audit report (DOCX).",
@@ -183,11 +182,11 @@ class PwnDocMCPServer:
             },
             handler=self._handle_generate_report
         )
-        
+
         # =====================================================================
         # FINDING TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="get_audit_findings",
             description="Get all findings/vulnerabilities from a specific audit.",
@@ -200,7 +199,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_get_findings
         )
-        
+
         self._register_tool(
             name="get_finding",
             description="Get details of a specific finding in an audit.",
@@ -214,7 +213,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_get_finding
         )
-        
+
         self._register_tool(
             name="create_finding",
             description="Create a new finding in an audit.",
@@ -238,7 +237,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_create_finding
         )
-        
+
         self._register_tool(
             name="update_finding",
             description="Update an existing finding.",
@@ -263,7 +262,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_update_finding
         )
-        
+
         self._register_tool(
             name="delete_finding",
             description="Delete a finding from an audit.",
@@ -277,7 +276,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_delete_finding
         )
-        
+
         self._register_tool(
             name="search_findings",
             description="Search for findings across all audits by various criteria.",
@@ -292,7 +291,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_search_findings
         )
-        
+
         self._register_tool(
             name="get_all_findings_with_context",
             description="Get ALL findings from ALL audits with full context (company, dates, team, scope, description, CWE, references) in a single request.",
@@ -305,18 +304,18 @@ class PwnDocMCPServer:
             },
             handler=self._handle_get_all_findings_with_context
         )
-        
+
         # =====================================================================
         # CLIENT & COMPANY TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="list_clients",
             description="List all clients.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_clients
         )
-        
+
         self._register_tool(
             name="create_client",
             description="Create a new client.",
@@ -335,14 +334,14 @@ class PwnDocMCPServer:
             },
             handler=self._handle_create_client
         )
-        
+
         self._register_tool(
             name="list_companies",
             description="List all companies.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_companies
         )
-        
+
         self._register_tool(
             name="create_company",
             description="Create a new company.",
@@ -357,18 +356,18 @@ class PwnDocMCPServer:
             },
             handler=self._handle_create_company
         )
-        
+
         # =====================================================================
         # VULNERABILITY TEMPLATE TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="list_vulnerabilities",
             description="List all vulnerability templates in the library.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_vulnerabilities
         )
-        
+
         self._register_tool(
             name="get_vulnerabilities_by_locale",
             description="Get vulnerability templates for a specific language.",
@@ -380,7 +379,7 @@ class PwnDocMCPServer:
             },
             handler=self._handle_get_vulnerabilities_by_locale
         )
-        
+
         self._register_tool(
             name="create_vulnerability",
             description="Create a new vulnerability template.",
@@ -397,57 +396,57 @@ class PwnDocMCPServer:
             },
             handler=self._handle_create_vulnerability
         )
-        
+
         # =====================================================================
         # USER TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="list_users",
             description="List all users (admin only).",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_users
         )
-        
+
         self._register_tool(
             name="get_current_user",
             description="Get current authenticated user's info.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_get_current_user
         )
-        
+
         # =====================================================================
         # SETTINGS & DATA TOOLS
         # =====================================================================
-        
+
         self._register_tool(
             name="list_templates",
             description="List all report templates.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_templates
         )
-        
+
         self._register_tool(
             name="list_languages",
             description="List all configured languages.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_languages
         )
-        
+
         self._register_tool(
             name="list_audit_types",
             description="List all audit types.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_list_audit_types
         )
-        
+
         self._register_tool(
             name="get_statistics",
             description="Get comprehensive statistics about audits, findings, clients, and more.",
             parameters={"type": "object", "properties": {}},
             handler=self._handle_get_statistics
         )
-    
+
     def _register_tool(
         self,
         name: str,
@@ -464,100 +463,100 @@ class PwnDocMCPServer:
             handler=handler,
             required=required or parameters.get("required", [])
         )
-    
+
     # =========================================================================
     # TOOL HANDLERS
     # =========================================================================
-    
+
     def _handle_list_audits(self, finding_title: Optional[str] = None) -> Dict:
         return self.client.list_audits(finding_title)
-    
+
     def _handle_get_audit(self, audit_id: str) -> Dict:
         return self.client.get_audit(audit_id)
-    
+
     def _handle_create_audit(self, name: str, language: str, audit_type: str) -> Dict:
         return self.client.create_audit(name, language, audit_type)
-    
+
     def _handle_update_audit_general(self, audit_id: str, **kwargs) -> Dict:
         return self.client.update_audit_general(audit_id, **kwargs)
-    
+
     def _handle_delete_audit(self, audit_id: str) -> Dict:
         self.client.delete_audit(audit_id)
         return {"success": True, "message": f"Audit {audit_id} deleted"}
-    
+
     def _handle_generate_report(self, audit_id: str) -> Dict:
         content = self.client.generate_report(audit_id)
         return {"success": True, "size_bytes": len(content)}
-    
+
     def _handle_get_findings(self, audit_id: str) -> List[Dict]:
         return self.client.get_findings(audit_id)
-    
+
     def _handle_get_finding(self, audit_id: str, finding_id: str) -> Dict:
         return self.client.get_finding(audit_id, finding_id)
-    
+
     def _handle_create_finding(self, audit_id: str, **kwargs) -> Dict:
         return self.client.create_finding(audit_id, **kwargs)
-    
+
     def _handle_update_finding(self, audit_id: str, finding_id: str, **kwargs) -> Dict:
         return self.client.update_finding(audit_id, finding_id, **kwargs)
-    
+
     def _handle_delete_finding(self, audit_id: str, finding_id: str) -> Dict:
         self.client.delete_finding(audit_id, finding_id)
         return {"success": True, "message": f"Finding {finding_id} deleted"}
-    
+
     def _handle_search_findings(self, **kwargs) -> List[Dict]:
         return self.client.search_findings(**kwargs)
-    
+
     def _handle_get_all_findings_with_context(
         self,
         include_failed: bool = False,
         exclude_categories: Optional[List[str]] = None
     ) -> List[Dict]:
         return self.client.get_all_findings_with_context(include_failed, exclude_categories)
-    
+
     def _handle_list_clients(self) -> List[Dict]:
         return self.client.list_clients()
-    
+
     def _handle_create_client(self, **kwargs) -> Dict:
         return self.client.create_client(**kwargs)
-    
+
     def _handle_list_companies(self) -> List[Dict]:
         return self.client.list_companies()
-    
+
     def _handle_create_company(self, **kwargs) -> Dict:
         return self.client.create_company(**kwargs)
-    
+
     def _handle_list_vulnerabilities(self) -> List[Dict]:
         return self.client.list_vulnerabilities()
-    
+
     def _handle_get_vulnerabilities_by_locale(self, locale: str = "en") -> List[Dict]:
         return self.client.get_vulnerabilities_by_locale(locale)
-    
+
     def _handle_create_vulnerability(self, **kwargs) -> Dict:
         return self.client.create_vulnerability(**kwargs)
-    
+
     def _handle_list_users(self) -> List[Dict]:
         return self.client.list_users()
-    
+
     def _handle_get_current_user(self) -> Dict:
         return self.client.get_current_user()
-    
+
     def _handle_list_templates(self) -> List[Dict]:
         return self.client.list_templates()
-    
+
     def _handle_list_languages(self) -> List[Dict]:
         return self.client.list_languages()
-    
+
     def _handle_list_audit_types(self) -> List[Dict]:
         return self.client.list_audit_types()
-    
+
     def _handle_get_statistics(self) -> Dict:
         return self.client.get_statistics()
-    
+
     # =========================================================================
     # MCP PROTOCOL HANDLING
     # =========================================================================
-    
+
     def _handle_initialize(self, params: Dict) -> Dict:
         """Handle MCP initialize request."""
         self._initialized = True
@@ -572,7 +571,7 @@ class PwnDocMCPServer:
                 "version": self.SERVER_VERSION,
             }
         }
-    
+
     def _handle_list_tools(self, params: Dict) -> Dict:
         """Handle tools/list request."""
         tools = []
@@ -583,17 +582,17 @@ class PwnDocMCPServer:
                 "inputSchema": tool.parameters,
             })
         return {"tools": tools}
-    
+
     def _handle_call_tool(self, params: Dict) -> Dict:
         """Handle tools/call request."""
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
-        
+
         if tool_name not in self._tools:
             raise ValueError(f"Unknown tool: {tool_name}")
-        
+
         tool = self._tools[tool_name]
-        
+
         try:
             result = tool.handler(**arguments)
             return {
@@ -611,13 +610,13 @@ class PwnDocMCPServer:
                 ],
                 "isError": True
             }
-    
+
     def _handle_message(self, message: Dict) -> Optional[Dict]:
         """Process an incoming MCP message."""
         method = message.get("method")
         params = message.get("params", {})
         msg_id = message.get("id")
-        
+
         handlers = {
             "initialize": self._handle_initialize,
             "initialized": lambda p: None,  # Notification, no response
@@ -625,7 +624,7 @@ class PwnDocMCPServer:
             "tools/call": self._handle_call_tool,
             "ping": lambda p: {},
         }
-        
+
         if method in handlers:
             try:
                 result = handlers[method](params)
@@ -655,29 +654,29 @@ class PwnDocMCPServer:
                     "message": f"Method not found: {method}"
                 }
             }
-    
+
     # =========================================================================
     # TRANSPORT IMPLEMENTATIONS
     # =========================================================================
-    
+
     def run_stdio(self):
         """Run server with stdio transport (for Claude Desktop)."""
         logger.info("Starting PwnDoc MCP Server (stdio transport)")
-        
+
         while True:
             try:
                 line = sys.stdin.readline()
                 if not line:
                     break
-                
+
                 message = json.loads(line)
                 logger.debug(f"Received: {message.get('method', 'response')}")
-                
+
                 response = self._handle_message(message)
                 if response:
                     sys.stdout.write(json.dumps(response) + "\n")
                     sys.stdout.flush()
-                    
+
             except json.JSONDecodeError as e:
                 logger.warning(f"Invalid JSON: {e}")
             except KeyboardInterrupt:
@@ -685,14 +684,14 @@ class PwnDocMCPServer:
                 break
             except Exception as e:
                 logger.exception(f"Error: {e}")
-    
+
     async def run_sse(self, host: str = "127.0.0.1", port: int = 8080):
         """Run server with SSE transport."""
         try:
             from aiohttp import web
         except ImportError:
             raise ImportError("aiohttp required for SSE transport: pip install aiohttp")
-        
+
         async def handle_sse(request):
             response = web.StreamResponse(
                 status=200,
@@ -703,39 +702,39 @@ class PwnDocMCPServer:
                 }
             )
             await response.prepare(request)
-            
+
             # Read messages from POST body
             data = await request.json()
             result = self._handle_message(data)
-            
+
             if result:
                 await response.write(f"data: {json.dumps(result)}\n\n".encode())
-            
+
             return response
-        
+
         app = web.Application()
         app.router.add_post("/mcp", handle_sse)
-        
+
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner, host, port)
         await site.start()
-        
+
         logger.info(f"SSE server running at http://{host}:{port}/mcp")
-        
+
         # Keep running
         while True:
             await asyncio.sleep(3600)
-    
+
     def run(self, transport: Optional[str] = None):
         """
         Run the MCP server.
-        
+
         Args:
             transport: Transport type (stdio, sse, websocket). Defaults to config value.
         """
         transport = transport or self.config.mcp_transport
-        
+
         if transport == "stdio":
             self.run_stdio()
         elif transport == "sse":
@@ -747,22 +746,22 @@ class PwnDocMCPServer:
 def main():
     """Main entry point."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="PwnDoc MCP Server")
     parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
-    
+
     logging.basicConfig(level=getattr(logging, args.log_level))
-    
+
     config = load_config(
         mcp_transport=args.transport,
         mcp_host=args.host,
         mcp_port=args.port,
     )
-    
+
     server = PwnDocMCPServer(config)
     server.run()
 
