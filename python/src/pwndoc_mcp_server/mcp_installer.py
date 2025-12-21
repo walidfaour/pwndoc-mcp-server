@@ -105,9 +105,8 @@ def detect_pwndoc_mcp_path() -> Optional[str]:
 
     # Check if we're running from source
     try:
-        import pwndoc_mcp_server
+        import pwndoc_mcp_server  # noqa: F401
 
-        module_path = Path(pwndoc_mcp_server.__file__).parent
         # If running from source, use python -m
         return f"{sys.executable} -m pwndoc_mcp_server.server"
     except ImportError:
@@ -141,7 +140,7 @@ def create_mcp_config(
     if args is None:
         args = ["serve"]
 
-    config = {
+    config: Dict[str, Any] = {
         "command": command,
         "args": args,
     }
@@ -167,7 +166,8 @@ def load_existing_config(config_path: Path) -> Dict[str, Any]:
 
     try:
         content = config_path.read_text()
-        return json.loads(content)
+        data = json.loads(content)
+        return dict(data) if isinstance(data, dict) else {}
     except Exception as e:
         logger.warning(f"Failed to load existing config: {e}")
         return {}

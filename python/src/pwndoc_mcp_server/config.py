@@ -101,11 +101,14 @@ class Config:
 
     @property
     def auth_method(self) -> str:
-        """Return the authentication method being used."""
-        if self.token:
-            return "token"
-        elif self.username and self.password:
+        """Return the authentication method being used.
+
+        Priority: username/password (preferred) > token > none
+        """
+        if self.username and self.password:
             return "credentials"
+        elif self.token:
+            return "token"
         return "none"
 
     def to_dict(self, include_secrets: bool = True) -> Dict[str, Any]:

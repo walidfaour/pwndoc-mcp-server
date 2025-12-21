@@ -412,8 +412,12 @@ if HAS_RICH:
     @app.command()
     def claude_install(
         force: bool = typer.Option(False, "--force", "-f", help="Overwrite existing configuration"),
-        env_file: Optional[str] = typer.Option(None, "--env-file", help="Path to .env file with credentials"),
-        skip_check: bool = typer.Option(False, "--skip-check", help="Skip Claude Desktop installation check"),
+        env_file: Optional[str] = typer.Option(
+            None, "--env-file", help="Path to .env file with credentials"
+        ),
+        skip_check: bool = typer.Option(
+            False, "--skip-check", help="Skip Claude Desktop installation check"
+        ),
     ):
         """Install PwnDoc MCP server for Claude Desktop."""
         try:
@@ -421,15 +425,17 @@ if HAS_RICH:
 
             # Check if Claude Desktop is installed
             if not skip_check and not is_claude_installed():
-                console.print("[yellow]⚠ Claude Desktop does not appear to be installed.[/yellow]\n")
-                console.print("The configuration will be created, but Claude Desktop won't use it until installed.\n")
-                console.print("To use with other MCP clients, see: [cyan]pwndoc-mcp serve --help[/cyan]\n")
-
-                proceed = Prompt.ask(
-                    "Continue anyway?",
-                    choices=["y", "n"],
-                    default="n"
+                console.print(
+                    "[yellow]⚠ Claude Desktop does not appear to be installed.[/yellow]\n"
                 )
+                console.print(
+                    "The configuration will be created, but Claude Desktop won't use it until installed.\n"
+                )
+                console.print(
+                    "To use with other MCP clients, see: [cyan]pwndoc-mcp serve --help[/cyan]\n"
+                )
+
+                proceed = Prompt.ask("Continue anyway?", choices=["y", "n"], default="n")
                 if proceed.lower() != "y":
                     console.print("[yellow]Installation cancelled[/yellow]")
                     raise typer.Exit(0)
@@ -451,16 +457,18 @@ if HAS_RICH:
 
             if success:
                 config_path = get_claude_config_path()
-                console.print(Panel(
-                    f"[green]✓[/green] PwnDoc MCP installed successfully!\n\n"
-                    f"Config file: [cyan]{config_path}[/cyan]\n\n"
-                    f"[yellow]Next steps:[/yellow]\n"
-                    f"1. Restart Claude Desktop\n"
-                    f"2. PwnDoc tools will be available in Claude\n\n"
-                    f"[dim]For other MCP clients: pwndoc-mcp serve[/dim]",
-                    title="Installation Complete",
-                    border_style="green"
-                ))
+                console.print(
+                    Panel(
+                        f"[green]✓[/green] PwnDoc MCP installed successfully!\n\n"
+                        f"Config file: [cyan]{config_path}[/cyan]\n\n"
+                        f"[yellow]Next steps:[/yellow]\n"
+                        f"1. Restart Claude Desktop\n"
+                        f"2. PwnDoc tools will be available in Claude\n\n"
+                        f"[dim]For other MCP clients: pwndoc-mcp serve[/dim]",
+                        title="Installation Complete",
+                        border_style="green",
+                    )
+                )
             else:
                 console.print("[yellow]Already installed (use --force to overwrite)[/yellow]")
 
@@ -477,12 +485,14 @@ if HAS_RICH:
             success = uninstall_mcp_config()
 
             if success:
-                console.print(Panel(
-                    "[green]✓[/green] PwnDoc MCP uninstalled successfully!\n\n"
-                    "[yellow]Restart Claude Desktop to apply changes.[/yellow]",
-                    title="Uninstallation Complete",
-                    border_style="green"
-                ))
+                console.print(
+                    Panel(
+                        "[green]✓[/green] PwnDoc MCP uninstalled successfully!\n\n"
+                        "[yellow]Restart Claude Desktop to apply changes.[/yellow]",
+                        title="Uninstallation Complete",
+                        border_style="green",
+                    )
+                )
             else:
                 console.print("[yellow]Not installed[/yellow]")
 
@@ -508,7 +518,9 @@ if HAS_RICH:
                 console.print("\n[green]✓[/green] PwnDoc MCP is installed\n")
 
                 # Display configuration
-                syntax = Syntax(json.dumps({"pwndoc-mcp": mcp_config}, indent=2), "json", theme="monokai")
+                syntax = Syntax(
+                    json.dumps({"pwndoc-mcp": mcp_config}, indent=2), "json", theme="monokai"
+                )
                 console.print(syntax)
             else:
                 console.print("\n[yellow]PwnDoc MCP is not installed[/yellow]")
