@@ -60,9 +60,9 @@ class TestServeCommand:
     @patch("pwndoc_mcp_server.cli.load_config")
     def test_serve_with_valid_config(self, mock_load, mock_server, runner):
         """Test serve with valid configuration."""
-        from pwndoc_mcp_server.config import PwnDocConfig
+        from pwndoc_mcp_server.config import Config
         
-        mock_load.return_value = PwnDocConfig(
+        mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -145,9 +145,9 @@ class TestTestCommand:
     @patch("pwndoc_mcp_server.cli.load_config")
     def test_test_connection_success(self, mock_load, mock_client, runner):
         """Test successful connection test."""
-        from pwndoc_mcp_server.config import PwnDocConfig
+        from pwndoc_mcp_server.config import Config
         
-        mock_load.return_value = PwnDocConfig(
+        mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -166,10 +166,10 @@ class TestTestCommand:
     @patch("pwndoc_mcp_server.cli.load_config")
     def test_test_connection_failure(self, mock_load, mock_client, runner):
         """Test failed connection test."""
-        from pwndoc_mcp_server.config import PwnDocConfig
+        from pwndoc_mcp_server.config import Config
         from pwndoc_mcp_server.client import AuthenticationError
         
-        mock_load.return_value = PwnDocConfig(
+        mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="invalid-token"
         )
@@ -216,9 +216,9 @@ class TestQueryCommand:
     @patch("pwndoc_mcp_server.cli.load_config")
     def test_query_tool(self, mock_load, mock_server, runner):
         """Test querying a tool directly."""
-        from pwndoc_mcp_server.config import PwnDocConfig
+        from pwndoc_mcp_server.config import Config
         
-        mock_load.return_value = PwnDocConfig(
+        mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )
@@ -236,9 +236,9 @@ class TestQueryCommand:
     @patch("pwndoc_mcp_server.cli.load_config")
     def test_query_with_params(self, mock_load, mock_server, runner):
         """Test querying with parameters."""
-        from pwndoc_mcp_server.config import PwnDocConfig
+        from pwndoc_mcp_server.config import Config
         
-        mock_load.return_value = PwnDocConfig(
+        mock_load.return_value = Config(
             url="https://pwndoc.test.com",
             token="test-token"
         )

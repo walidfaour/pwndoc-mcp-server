@@ -16,8 +16,8 @@ from pwndoc_mcp_server.client import (
     RateLimitError,
 )
 from pwndoc_mcp_server.config import (
-    PwnDocConfig,
-    get_config_path,
+    Config,
+    init_config_interactive,
     load_config,
     save_config,
 )
@@ -28,10 +28,10 @@ __all__ = [
     # Version
     "__version__",
     # Config
-    "PwnDocConfig",
+    "Config",
     "load_config",
     "save_config",
-    "get_config_path",
+    "init_config_interactive",
     # Client
     "PwnDocClient",
     "PwnDocError",
