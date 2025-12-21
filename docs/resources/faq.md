@@ -100,13 +100,16 @@ Examples:
 
 ### How many tools are available?
 
-50+ tools covering:
-- Audit management (12 tools)
+**90 MCP tools** with complete PwnDoc API coverage:
+- Audit management (13 tools)
 - Finding management (9 tools)
 - Client/Company management (8 tools)
-- Vulnerability templates (10 tools)
-- Users and settings (12 tools)
-- Reports and statistics (4+ tools)
+- Vulnerability templates (9 tools)
+- Users & authentication (11 tools including TOTP/2FA)
+- Data types & configuration (22 tools)
+- Settings & templates (10 tools)
+- Images (4 tools)
+- Reports & statistics (4 tools)
 
 ### Can I create findings with Claude?
 
