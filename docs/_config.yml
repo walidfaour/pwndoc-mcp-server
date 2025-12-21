@@ -1,0 +1,30 @@
+title: PwnDoc MCP Server
+description: Model Context Protocol server for PwnDoc pentest documentation
+baseurl: "/pwndoc-mcp-server"
+url: "https://walidfaour.github.io"
+
+theme: jekyll-theme-minimal
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Navigation
+nav:
+  - title: Getting Started
+    url: /getting-started/installation
+  - title: Configuration
+    url: /getting-started/configuration
+  - title: Tools Reference
+    url: /tools/overview
+  - title: User Guide
+    url: /user-guide/cli
+  - title: Development
+    url: /development/contributing

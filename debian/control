@@ -1,0 +1,27 @@
+Source: pwndoc-mcp-server
+Section: utils
+Priority: optional
+Maintainer: Faour <faour@example.com>
+Build-Depends: debhelper-compat (= 13), python3, python3-pip
+Standards-Version: 4.6.0
+Homepage: https://github.com/faour-sec/pwndoc-mcp-server
+Vcs-Browser: https://github.com/faour-sec/pwndoc-mcp-server
+Vcs-Git: https://github.com/faour-sec/pwndoc-mcp-server.git
+Rules-Requires-Root: no
+
+Package: pwndoc-mcp-server
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: MCP Server for PwnDoc - Pentest Documentation Integration
+ A Model Context Protocol (MCP) server that provides seamless integration
+ between AI assistants (Claude, OpenAI) and PwnDoc, the pentest reporting
+ and documentation platform.
+ .
+ Features:
+  - 50+ tools for audit, finding, client, and vulnerability management
+  - Natural language queries for penetration testing data
+  - Full PwnDoc API coverage with authentication handling
+  - Rate limiting, auto-retry, and comprehensive error management
+  - Support for stdio and SSE transports
+ .
+ This package provides a standalone binary that requires no Python runtime.

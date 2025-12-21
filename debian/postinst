@@ -1,0 +1,79 @@
+#!/bin/bash
+set -e
+
+# Post-installation script for pwndoc-mcp-server
+
+case "$1" in
+    configure)
+        # Create configuration directory if it doesn't exist
+        CONFIG_DIR="/etc/pwndoc-mcp"
+        if [ ! -d "$CONFIG_DIR" ]; then
+            mkdir -p "$CONFIG_DIR"
+            chmod 755 "$CONFIG_DIR"
+        fi
+        
+        # Create example configuration if none exists
+        if [ ! -f "$CONFIG_DIR/config.yaml" ]; then
+            cat > "$CONFIG_DIR/config.yaml.example" << 'EOF'
+# PwnDoc MCP Server Configuration
+# Copy this file to config.yaml and update with your settings
+
+# PwnDoc server URL (required)
+url: "https://your-pwndoc-instance.com"
+
+# Authentication (choose one method)
+# Method 1: Username/Password
+username: ""
+password: ""
+
+# Method 2: Pre-existing token
+# token: "your-jwt-token"
+
+# Optional settings
+verify_ssl: true
+timeout: 30
+rate_limit: 10
+
+# Logging configuration
+log_level: "INFO"
+log_file: "/var/log/pwndoc-mcp/server.log"
+EOF
+            chmod 644 "$CONFIG_DIR/config.yaml.example"
+        fi
+        
+        # Create log directory
+        LOG_DIR="/var/log/pwndoc-mcp"
+        if [ ! -d "$LOG_DIR" ]; then
+            mkdir -p "$LOG_DIR"
+            chmod 755 "$LOG_DIR"
+        fi
+        
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║     PwnDoc MCP Server installed successfully!                ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        echo "║                                                              ║"
+        echo "║  Configuration:                                              ║"
+        echo "║    - Example config: /etc/pwndoc-mcp/config.yaml.example     ║"
+        echo "║    - Copy to: /etc/pwndoc-mcp/config.yaml                    ║"
+        echo "║                                                              ║"
+        echo "║  Quick Start:                                                ║"
+        echo "║    1. Copy and edit the config file                          ║"
+        echo "║    2. Test connection: pwndoc-mcp-server test                ║"
+        echo "║    3. Start server: pwndoc-mcp-server serve                  ║"
+        echo "║                                                              ║"
+        echo "║  Documentation: https://faour-sec.gitbook.io/pwndoc-mcp      ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

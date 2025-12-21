@@ -1,0 +1,100 @@
+{
+  "name": "pwndoc",
+  "display_name": "PwnDoc MCP Server",
+  "description": "Model Context Protocol server for PwnDoc penetration testing documentation. Enables AI assistants to interact with your pentest reports, findings, clients, and vulnerability templates.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Walid Faour",
+    "github": "walidfaour"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walidfaour/pwndoc-mcp-server"
+  },
+  "homepage": "https://github.com/walidfaour/pwndoc-mcp-server",
+  "documentation": "https://github.com/walidfaour/pwndoc-mcp-server#readme",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "pwndoc",
+    "pentest",
+    "penetration-testing",
+    "security",
+    "vulnerability",
+    "documentation",
+    "audit",
+    "report"
+  ],
+  "categories": [
+    "security",
+    "documentation",
+    "productivity"
+  ],
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "tool_count": 50,
+  "transport": ["stdio", "sse"],
+  "installation": {
+    "pip": {
+      "command": "pip install pwndoc-mcp-server[all]",
+      "package": "pwndoc-mcp-server"
+    },
+    "docker": {
+      "image": "ghcr.io/walidfaour/pwndoc-mcp-server",
+      "command": "docker pull ghcr.io/walidfaour/pwndoc-mcp-server:latest"
+    },
+    "binary": {
+      "platforms": ["linux-x64", "macos-x64", "windows-x64"],
+      "url": "https://github.com/walidfaour/pwndoc-mcp-server/releases"
+    }
+  },
+  "configuration": {
+    "required": [
+      {
+        "name": "PWNDOC_URL",
+        "description": "PwnDoc instance URL",
+        "type": "string"
+      }
+    ],
+    "optional": [
+      {
+        "name": "PWNDOC_USERNAME",
+        "description": "Username for authentication",
+        "type": "string"
+      },
+      {
+        "name": "PWNDOC_PASSWORD",
+        "description": "Password for authentication",
+        "type": "string",
+        "secret": true
+      },
+      {
+        "name": "PWNDOC_TOKEN",
+        "description": "JWT token (alternative to username/password)",
+        "type": "string",
+        "secret": true
+      }
+    ]
+  },
+  "claude_desktop_config": {
+    "mcpServers": {
+      "pwndoc": {
+        "command": "pwndoc-mcp",
+        "args": ["serve"],
+        "env": {
+          "PWNDOC_URL": "${PWNDOC_URL}",
+          "PWNDOC_USERNAME": "${PWNDOC_USERNAME}",
+          "PWNDOC_PASSWORD": "${PWNDOC_PASSWORD}"
+        }
+      }
+    }
+  },
+  "badges": {
+    "ci": "https://github.com/walidfaour/pwndoc-mcp-server/actions/workflows/ci.yml/badge.svg",
+    "pypi": "https://img.shields.io/pypi/v/pwndoc-mcp-server",
+    "license": "https://img.shields.io/github/license/walidfaour/pwndoc-mcp-server"
+  }
+}

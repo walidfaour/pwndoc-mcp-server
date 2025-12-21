@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="50%" style="stop-color:#161b22"/>
+      <stop offset="100%" style="stop-color:#0d1117"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4aa"/>
+      <stop offset="100%" style="stop-color:#00a8cc"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#c9d1d9"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="200" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#21262d" stroke-width="0.5"/>
+  </pattern>
+  <rect width="800" height="200" fill="url(#grid)" opacity="0.5"/>
+  
+  <!-- Accent line top -->
+  <rect x="0" y="0" width="800" height="3" fill="url(#accentGrad)"/>
+  
+  <!-- Logo mark (simplified) -->
+  <g transform="translate(80, 60)">
+    <circle cx="40" cy="40" r="38" fill="none" stroke="url(#accentGrad)" stroke-width="2"/>
+    <path d="M25 25 L45 25 L55 35 L55 55 L25 55 Z" fill="none" stroke="#e6edf3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M45 25 L45 35 L55 35" fill="none" stroke="#e6edf3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 40 L36 46 L30 52" fill="none" stroke="url(#accentGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="40" y1="52" x2="50" y2="52" stroke="url(#accentGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="95" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="42" font-weight="700" fill="url(#textGrad)">PwnDoc</text>
+  <text x="370" y="95" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="42" font-weight="300" fill="#8b949e">MCP Server</text>
+  
+  <!-- Tagline -->
+  <text x="200" y="130" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" fill="#8b949e">AI-Powered Penetration Testing Documentation</text>
+  
+  <!-- Version badge -->
+  <rect x="200" y="145" width="45" height="22" rx="4" fill="#238636"/>
+  <text x="222" y="161" font-family="system-ui, monospace" font-size="12" fill="#ffffff" text-anchor="middle">v2.0</text>
+  
+  <!-- Accent line bottom -->
+  <rect x="0" y="197" width="800" height="3" fill="url(#accentGrad)"/>
+</svg>

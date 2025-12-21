@@ -1,0 +1,41 @@
+{
+    "version": "1.0.0",
+    "description": "Model Context Protocol server for PwnDoc penetration testing documentation",
+    "homepage": "https://github.com/walidfaour/pwndoc-mcp-server",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/walidfaour/pwndoc-mcp-server/releases/download/v1.0.0/pwndoc-mcp-server-windows-x64.exe",
+            "hash": "PLACEHOLDER_SHA256"
+        }
+    },
+    "bin": [
+        ["pwndoc-mcp-server-windows-x64.exe", "pwndoc-mcp"]
+    ],
+    "checkver": {
+        "github": "https://github.com/walidfaour/pwndoc-mcp-server"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/walidfaour/pwndoc-mcp-server/releases/download/v$version/pwndoc-mcp-server-windows-x64.exe"
+            }
+        }
+    },
+    "notes": [
+        "PwnDoc MCP Server has been installed!",
+        "",
+        "To configure, run:",
+        "  pwndoc-mcp config init",
+        "",
+        "Or set environment variables:",
+        "  $env:PWNDOC_URL = 'https://your-pwndoc-instance.com'",
+        "  $env:PWNDOC_USERNAME = 'your-username'",
+        "  $env:PWNDOC_PASSWORD = 'your-password'",
+        "",
+        "For Claude Desktop integration, add to your config:",
+        "  %APPDATA%\\Claude\\claude_desktop_config.json",
+        "",
+        "Documentation: https://github.com/walidfaour/pwndoc-mcp-server"
+    ]
+}

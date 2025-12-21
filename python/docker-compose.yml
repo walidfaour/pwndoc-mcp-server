@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  pwndoc-mcp:
+    build: .
+    image: ghcr.io/walidfaour/pwndoc-mcp-server:latest
+    container_name: pwndoc-mcp-server
+    environment:
+      - PWNDOC_URL=${PWNDOC_URL}
+      - PWNDOC_TOKEN=${PWNDOC_TOKEN}
+      - PWNDOC_USERNAME=${PWNDOC_USERNAME:-}
+      - PWNDOC_PASSWORD=${PWNDOC_PASSWORD:-}
+      - PWNDOC_VERIFY_SSL=${PWNDOC_VERIFY_SSL:-true}
+      - PWNDOC_TIMEOUT=${PWNDOC_TIMEOUT:-30}
+      - PWNDOC_LOG_LEVEL=${PWNDOC_LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
