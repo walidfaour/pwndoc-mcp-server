@@ -63,7 +63,6 @@ jobs:
       
       - name: Run type checking
         run: mypy src/pwndoc_mcp_server --ignore-missing-imports
-        continue-on-error: true
       
       - name: Run tests
         run: pytest tests/ -v --cov=pwndoc_mcp_server --cov-report=xml
