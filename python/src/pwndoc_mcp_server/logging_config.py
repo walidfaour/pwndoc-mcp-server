@@ -150,7 +150,7 @@ class PerformanceLogger:
         import time
 
         if name in self._metrics:
-            duration = time.time() - self._metrics[name]["start"]
+            duration: float = time.time() - float(self._metrics[name]["start"])
             self.logger.debug(f"Performance: {name} took {duration:.3f}s")
             return duration
         return 0.0
@@ -215,6 +215,7 @@ def setup_logging(
     root_logger.handlers = []
 
     # Select format
+    formatter: logging.Formatter
     if json_output or log_format == "json":
         formatter = JSONFormatter()
     elif log_format == "detailed":
