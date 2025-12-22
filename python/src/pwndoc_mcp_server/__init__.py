@@ -4,47 +4,61 @@ PwnDoc MCP Server
 Model Context Protocol server for PwnDoc penetration testing documentation.
 """
 
-# Configure logging to ALWAYS go to stderr before anything else
-# This prevents stdout pollution that breaks MCP JSON-RPC protocol
-import logging
+# CRITICAL: Suppress ALL output to stdout during module initialization
+# MCP protocol requires stdout to ONLY contain JSON-RPC messages
+import os
 import sys
+import logging
+import warnings
 
-# Set up basic logging to stderr FIRST, before any imports
-# This ensures any early logging goes to stderr, never stdout
+# Suppress ALL warnings that could leak to stdout
+warnings.filterwarnings("ignore")
+
+# Configure logging to stderr BEFORE anything else
 logging.basicConfig(
-    level=logging.WARNING,  # Only show WARNING and above by default
+    level=logging.CRITICAL,  # Only CRITICAL and above (basically nothing)
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    stream=sys.stderr,  # CRITICAL: All logs go to stderr, never stdout
-    force=True,  # Override any existing configuration
+    stream=sys.stderr,
+    force=True,
 )
 
-from pwndoc_mcp_server.version import get_version
+# Temporarily redirect stdout to /dev/null during imports
+_original_stdout = sys.stdout
+_devnull = open(os.devnull, 'w')
+sys.stdout = _devnull
 
-__version__ = get_version()
-__author__ = "Walid Faour"
+try:
+    from pwndoc_mcp_server.version import get_version
 
-# Export main classes and functions
-from pwndoc_mcp_server.client import (
-    AuthenticationError,
-    NotFoundError,
-    PwnDocClient,
-    PwnDocError,
-    RateLimitError,
-)
-from pwndoc_mcp_server.config import (
-    Config,
-    get_config_path,
-    init_config_interactive,
-    load_config,
-    save_config,
-)
-from pwndoc_mcp_server.logging_config import LogLevel, get_logger, setup_logging
-from pwndoc_mcp_server.server import (
-    TOOL_DEFINITIONS,
-    PwnDocMCPServer,
-    create_server,
-    get_tool_definitions,
-)
+    __version__ = get_version()
+    __author__ = "Walid Faour"
+
+    # Export main classes and functions
+    from pwndoc_mcp_server.client import (
+        AuthenticationError,
+        NotFoundError,
+        PwnDocClient,
+        PwnDocError,
+        RateLimitError,
+    )
+    from pwndoc_mcp_server.config import (
+        Config,
+        get_config_path,
+        init_config_interactive,
+        load_config,
+        save_config,
+    )
+    from pwndoc_mcp_server.logging_config import LogLevel, get_logger, setup_logging
+    from pwndoc_mcp_server.server import (
+        TOOL_DEFINITIONS,
+        PwnDocMCPServer,
+        create_server,
+        get_tool_definitions,
+    )
+finally:
+    # ALWAYS restore stdout
+    sys.stdout = _original_stdout
+    _devnull.close()
 
 __all__ = [
     # Version
