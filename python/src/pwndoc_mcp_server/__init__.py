@@ -10,6 +10,7 @@ import logging
 import sys
 
 # Set up basic logging to stderr FIRST, before any imports
+# This ensures any early logging goes to stderr, never stdout
 logging.basicConfig(
     level=logging.WARNING,  # Only show WARNING and above by default
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -42,6 +43,7 @@ from pwndoc_mcp_server.server import (
     TOOL_DEFINITIONS,
     PwnDocMCPServer,
     create_server,
+    get_tool_definitions,
 )
 
 __all__ = [
@@ -62,6 +64,7 @@ __all__ = [
     # Server
     "PwnDocMCPServer",
     "TOOL_DEFINITIONS",
+    "get_tool_definitions",
     "create_server",
     # Logging
     "LogLevel",

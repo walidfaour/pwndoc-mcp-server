@@ -63,13 +63,14 @@ class PwnDocMCPServer:
     SERVER_VERSION = get_version()
     PROTOCOL_VERSION = "2024-11-05"
 
-    def __init__(self, config: Optional[Config] = None, transport: Optional[str] = None):
+    def __init__(self, config: Optional[Config] = None, transport: Optional[str] = None, _silent: bool = False):
         """
         Initialize MCP server.
 
         Args:
             config: Configuration object (loads from environment if not provided)
             transport: Transport type (stdio, sse, websocket)
+            _silent: Internal flag to suppress logging during tool definition extraction
         """
         self.config = config or load_config()
         self.transport = transport or self.config.mcp_transport
@@ -86,7 +87,10 @@ class PwnDocMCPServer:
         # Register all tools
         self._register_tools()
 
-        logger.info(f"PwnDocMCPServer initialized with {len(self._tools)} tools")
+        # Only log if not silent (prevents stdout pollution during module import)
+        if not _silent:
+            logger.info(f"PwnDocMCPServer initialized with {len(self._tools)} tools")
+
 
     @property
     def name(self) -> str:
@@ -1895,8 +1899,9 @@ def _get_tool_definitions() -> List[Dict]:
         List of tool definitions
     """
     # Create a temporary server to extract tool definitions
+    # Use _silent=True to prevent logging during module import
     config = Config(url="http://temp", token="temp")
-    server = PwnDocMCPServer(config)
+    server = PwnDocMCPServer(config, _silent=True)
     tools = []
     for tool in server._tools.values():
         tools.append(
@@ -1909,8 +1914,17 @@ def _get_tool_definitions() -> List[Dict]:
     return tools
 
 
-# Initialize TOOL_DEFINITIONS on module load
-TOOL_DEFINITIONS = _get_tool_definitions()
+def get_tool_definitions() -> List[Dict]:
+    """
+    Get tool definitions, initializing them lazily on first access.
+
+    Returns:
+        List of tool definitions
+    """
+    global TOOL_DEFINITIONS
+    if TOOL_DEFINITIONS is None:
+        TOOL_DEFINITIONS = _get_tool_definitions()
+    return TOOL_DEFINITIONS
 
 
 def create_server(config: Optional[Config] = None, **kwargs) -> PwnDocMCPServer:
