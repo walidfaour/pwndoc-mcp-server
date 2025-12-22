@@ -6,9 +6,9 @@ Model Context Protocol server for PwnDoc penetration testing documentation.
 
 # CRITICAL: Suppress ALL output to stdout during module initialization
 # MCP protocol requires stdout to ONLY contain JSON-RPC messages
+import logging
 import os
 import sys
-import logging
 import warnings
 
 # Suppress ALL warnings that could leak to stdout
@@ -24,7 +24,7 @@ logging.basicConfig(
 
 # Temporarily redirect stdout to /dev/null during imports
 _original_stdout = sys.stdout
-_devnull = open(os.devnull, 'w')
+_devnull = open(os.devnull, "w")
 sys.stdout = _devnull
 
 try:
