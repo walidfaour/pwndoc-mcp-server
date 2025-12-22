@@ -1,11 +1,11 @@
 {
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Model Context Protocol server for PwnDoc penetration testing documentation",
     "homepage": "https://github.com/walidfaour/pwndoc-mcp-server",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/walidfaour/pwndoc-mcp-server/releases/download/v1.0.6/pwndoc-mcp-server-windows-x64.exe",
+            "url": "https://github.com/walidfaour/pwndoc-mcp-server/releases/download/v1.0.7/pwndoc-mcp-server-windows-x64.exe",
             "hash": "PLACEHOLDER_SHA256"
         }
     },
