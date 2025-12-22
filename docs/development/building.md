@@ -95,8 +95,8 @@ python -m build
 
 # Output in dist/
 ls dist/
-# pwndoc_mcp_server-1.0.5-py3-none-any.whl
-# pwndoc_mcp_server-1.0.5.tar.gz
+# pwndoc_mcp_server-1.0.6-py3-none-any.whl
+# pwndoc_mcp_server-1.0.6.tar.gz
 ```
 
 ### Docker Image
@@ -106,7 +106,7 @@ ls dist/
 docker build -t pwndoc-mcp-server .
 
 # Build with tag
-docker build -t pwndoc-mcp-server:1.0.5 .
+docker build -t pwndoc-mcp-server:1.0.6 .
 
 # Multi-platform build
 docker buildx build --platform linux/amd64,linux/arm64 -t pwndoc-mcp-server .
@@ -138,7 +138,7 @@ sudo apt install dpkg-dev debhelper
 # Build .deb
 dpkg-buildpackage -us -uc -b
 
-# Output: ../pwndoc-mcp-server_1.0.5_amd64.deb
+# Output: ../pwndoc-mcp-server_1.0.6_amd64.deb
 ```
 
 ### RPM Package
