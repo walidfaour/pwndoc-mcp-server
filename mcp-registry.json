@@ -2,7 +2,7 @@
   "name": "pwndoc",
   "display_name": "PwnDoc MCP Server",
   "description": "Model Context Protocol server for PwnDoc penetration testing documentation. Enables AI assistants to interact with your pentest reports, findings, clients, and vulnerability templates.",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "author": {
     "name": "Walid Faour",
     "github": "walidfaour"
