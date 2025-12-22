@@ -63,7 +63,12 @@ class PwnDocMCPServer:
     SERVER_VERSION = get_version()
     PROTOCOL_VERSION = "2024-11-05"
 
-    def __init__(self, config: Optional[Config] = None, transport: Optional[str] = None, _silent: bool = False):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        transport: Optional[str] = None,
+        _silent: bool = False,
+    ):
         """
         Initialize MCP server.
 
@@ -90,7 +95,6 @@ class PwnDocMCPServer:
         # Only log if not silent (prevents stdout pollution during module import)
         if not _silent:
             logger.info(f"PwnDocMCPServer initialized with {len(self._tools)} tools")
-
 
     @property
     def name(self) -> str:
