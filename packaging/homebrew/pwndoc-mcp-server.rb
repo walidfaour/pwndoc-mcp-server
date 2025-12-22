@@ -12,7 +12,7 @@ class PwndocMcpServer < Formula
 
   desc "Model Context Protocol server for PwnDoc penetration testing documentation"
   homepage "https://github.com/walidfaour/pwndoc-mcp-server"
-  url "https://github.com/walidfaour/pwndoc-mcp-server/archive/refs/tags/v1.0.6.tar.gz"
+  url "https://github.com/walidfaour/pwndoc-mcp-server/archive/refs/tags/v1.0.7.tar.gz"
   sha256 "PLACEHOLDER_SHA256"  # Update with actual sha256 after release
   license "MIT"
   head "https://github.com/walidfaour/pwndoc-mcp-server.git", branch: "main"
