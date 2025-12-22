@@ -4,6 +4,19 @@ PwnDoc MCP Server
 Model Context Protocol server for PwnDoc penetration testing documentation.
 """
 
+# Configure logging to ALWAYS go to stderr before anything else
+# This prevents stdout pollution that breaks MCP JSON-RPC protocol
+import logging
+import sys
+
+# Set up basic logging to stderr FIRST, before any imports
+logging.basicConfig(
+    level=logging.WARNING,  # Only show WARNING and above by default
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,  # CRITICAL: All logs go to stderr, never stdout
+    force=True,  # Override any existing configuration
+)
+
 from pwndoc_mcp_server.version import get_version
 
 __version__ = get_version()
