@@ -279,7 +279,7 @@ pwndoc-mcp version
 
 Output:
 ```
-pwndoc-mcp-server 1.0.4
+pwndoc-mcp-server 1.0.5
 Python 3.11.5
 Platform: Linux-5.15.0-x86_64
 ```

@@ -21,7 +21,7 @@ docker run -it --rm \
 | Tag | Description |
 |-----|-------------|
 | `latest` | Latest stable release |
-| `1.0.4` | Specific version |
+| `1.0.5` | Specific version |
 | `1.0` | Latest patch of version 1.0 |
 | `main` | Latest from main branch |
 | `sha-abc1234` | Specific commit |
@@ -195,7 +195,7 @@ Response:
 ```json
 {
   "status": "healthy",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "pwndoc_connected": true
 }
 ```
