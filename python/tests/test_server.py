@@ -9,9 +9,9 @@ import pytest
 
 from pwndoc_mcp_server.config import Config
 from pwndoc_mcp_server.server import (
-    TOOL_DEFINITIONS,
     PwnDocMCPServer,
     create_server,
+    get_tool_definitions,
 )
 
 
@@ -20,12 +20,14 @@ class TestToolDefinitions:
 
     def test_tool_definitions_exist(self):
         """Test that tool definitions are defined."""
-        assert TOOL_DEFINITIONS is not None
-        assert len(TOOL_DEFINITIONS) > 0
+        tool_defs = get_tool_definitions()
+        assert tool_defs is not None
+        assert len(tool_defs) > 0
 
     def test_tool_definition_structure(self):
         """Test tool definition structure."""
-        for tool in TOOL_DEFINITIONS:
+        tool_defs = get_tool_definitions()
+        for tool in tool_defs:
             assert "name" in tool
             assert "description" in tool
             assert "inputSchema" in tool
@@ -38,7 +40,8 @@ class TestToolDefinitions:
 
     def test_audit_tools_exist(self):
         """Test that audit tools are defined."""
-        tool_names = [t["name"] for t in TOOL_DEFINITIONS]
+        tool_defs = get_tool_definitions()
+        tool_names = [t["name"] for t in tool_defs]
 
         expected_audit_tools = [
             "list_audits",
@@ -54,7 +57,8 @@ class TestToolDefinitions:
 
     def test_finding_tools_exist(self):
         """Test that finding tools are defined."""
-        tool_names = [t["name"] for t in TOOL_DEFINITIONS]
+        tool_defs = get_tool_definitions()
+        tool_names = [t["name"] for t in tool_defs]
 
         expected_finding_tools = [
             "get_audit_findings",
@@ -69,7 +73,8 @@ class TestToolDefinitions:
 
     def test_client_tools_exist(self):
         """Test that client tools are defined."""
-        tool_names = [t["name"] for t in TOOL_DEFINITIONS]
+        tool_defs = get_tool_definitions()
+        tool_names = [t["name"] for t in tool_defs]
 
         expected_client_tools = [
             "list_clients",
@@ -83,7 +88,8 @@ class TestToolDefinitions:
 
     def test_special_tools_exist(self):
         """Test that special aggregate tools are defined."""
-        tool_names = [t["name"] for t in TOOL_DEFINITIONS]
+        tool_defs = get_tool_definitions()
+        tool_names = [t["name"] for t in tool_defs]
 
         assert "get_all_findings_with_context" in tool_names
         assert "search_findings" in tool_names
