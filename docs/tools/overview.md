@@ -1,21 +1,24 @@
 # Tool Reference Overview
 
-PwnDoc MCP Server provides 50+ tools organized into logical categories. This page provides an overview of all available tools.
+PwnDoc MCP Server provides **90 MCP tools** with complete coverage of the PwnDoc API (all 92 endpoints except 2 internal auth endpoints).
 
 ## Tool Categories
 
 | Category | Tools | Description |
 |----------|-------|-------------|
-| [Audit Management](audits.md) | 12 | Create, read, update, delete audits |
-| [Finding Management](findings.md) | 8 | Manage vulnerabilities within audits |
+| [Audit Management](audits.md) | 13 | Create, read, update, delete audits + sections |
+| [Finding Management](findings.md) | 9 | Manage vulnerabilities within audits |
 | [Client & Company](clients-companies.md) | 8 | Manage clients and companies |
-| [Vulnerability Templates](vulnerabilities.md) | 10 | Reusable vulnerability library |
-| [Users & Settings](users-settings.md) | 12 | User management and system config |
+| [Vulnerability Templates](vulnerabilities.md) | 9 | Reusable vulnerability library + updates |
+| [Users & Authentication](users-settings.md) | 11 | User management + TOTP/2FA |
+| Data Types & Configuration | 22 | Languages, audit types, sections, custom fields |
+| Settings & Templates | 10 | System settings, report templates |
+| Images | 4 | Image management |
 | [Reports & Statistics](reports-statistics.md) | 4 | Generate reports and view metrics |
 
 ## Quick Reference
 
-### Audit Management
+### Audit Management (13 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -27,12 +30,13 @@ PwnDoc MCP Server provides 50+ tools organized into logical categories. This pag
 | `delete_audit` | Delete an audit permanently |
 | `get_audit_network` | Get network configuration |
 | `update_audit_network` | Update network settings |
+| `get_audit_sections` | Get audit sections content |
+| `update_audit_sections` | Update audit sections content |
 | `toggle_audit_approval` | Toggle approval status |
-| `update_audit_review_status` | Set review ready status |
-| `get_audit_section` | Get a specific section |
-| `update_audit_section` | Update section content |
+| `update_review_status` | Set review ready status |
+| `generate_audit_report` | Generate DOCX report |
 
-### Finding Management
+### Finding Management (9 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -44,9 +48,9 @@ PwnDoc MCP Server provides 50+ tools organized into logical categories. This pag
 | `sort_findings` | Reorder findings in an audit |
 | `move_finding` | Move finding between audits |
 | `search_findings` | Search findings across all audits |
-| `get_all_findings_with_context` | Get all findings with full audit context |
+| `get_all_findings_with_context` | Get all findings with full audit context (CWE, OWASP, HTML stripping) |
 
-### Client & Company
+### Client & Company (8 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -59,7 +63,7 @@ PwnDoc MCP Server provides 50+ tools organized into logical categories. This pag
 | `update_company` | Update company information |
 | `delete_company` | Delete a company |
 
-### Vulnerability Templates
+### Vulnerability Templates (9 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -74,7 +78,7 @@ PwnDoc MCP Server provides 50+ tools organized into logical categories. This pag
 | `get_vulnerability_updates` | Check for template updates |
 | `merge_vulnerability` | Merge template with updates |
 
-### Users & Settings
+### Users & Authentication (11 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -85,48 +89,105 @@ PwnDoc MCP Server provides 50+ tools organized into logical categories. This pag
 | `update_user` | Update user (admin only) |
 | `update_current_user` | Update own profile |
 | `list_reviewers` | List available reviewers |
-| `get_settings` | Get system settings |
-| `update_settings` | Update system settings |
-| `get_public_settings` | Get public settings |
-| `export_settings` | Export all settings |
-| `revert_settings` | Revert to defaults |
+| `get_totp_status` | Get TOTP (2FA) status |
+| `setup_totp` | Setup TOTP (2FA) |
+| `disable_totp` | Disable TOTP (2FA) |
 
-### Reports & Statistics
+### Data Types & Configuration (22 tools)
+
+**Languages (4 tools)**
+- `list_languages` - List configured languages
+- `create_language` - Create new language
+- `update_language` - Update language
+- `delete_language` - Delete language
+
+**Audit Types (4 tools)**
+- `list_audit_types` - List audit types
+- `create_audit_type` - Create new audit type
+- `update_audit_type` - Update audit type
+- `delete_audit_type` - Delete audit type
+
+**Vulnerability Types (4 tools)**
+- `list_vulnerability_types` - List vulnerability types
+- `create_vulnerability_type` - Create new vulnerability type
+- `update_vulnerability_type` - Update vulnerability type
+- `delete_vulnerability_type` - Delete vulnerability type
+
+**Vulnerability Categories (4 tools)**
+- `list_vulnerability_categories` - List categories
+- `create_vulnerability_category` - Create new category
+- `update_vulnerability_category` - Update category
+- `delete_vulnerability_category` - Delete category
+
+**Sections (4 tools)**
+- `list_sections` - List section definitions
+- `create_section` - Create new section
+- `update_section` - Update section
+- `delete_section` - Delete section
+
+**Custom Fields (4 tools)**
+- `list_custom_fields` - List custom field definitions
+- `create_custom_field` - Create new custom field
+- `update_custom_field` - Update custom field
+- `delete_custom_field` - Delete custom field
+
+### Settings & Templates (10 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_settings` | Get system settings |
+| `get_public_settings` | Get public settings |
+| `update_settings` | Update system settings |
+| `export_settings` | Export all settings |
+| `import_settings` | Import/revert settings |
+| `list_templates` | List report templates |
+| `create_template` | Create new template |
+| `update_template` | Update template |
+| `delete_template` | Delete template |
+| `download_template` | Download template file |
+
+### Images (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_image` | Get image metadata |
+| `download_image` | Download image file |
+| `upload_image` | Upload image to audit |
+| `delete_image` | Delete image |
+
+### Reports & Statistics (4 tools)
 
 | Tool | Description |
 |------|-------------|
 | `generate_audit_report` | Generate DOCX report |
 | `get_statistics` | Get comprehensive statistics |
-| `list_templates` | List report templates |
-| `download_template` | Download template file |
-
-### Configuration Management
-
-| Tool | Description |
-|------|-------------|
-| `list_languages` | List configured languages |
-| `list_audit_types` | List audit types |
-| `list_vulnerability_types` | List vulnerability types |
-| `list_vulnerability_categories` | List vulnerability categories |
-| `list_sections` | List section definitions |
-| `list_custom_fields` | List custom field definitions |
 | `list_roles` | List user roles |
 
 ## Special Tools
 
 ### get_all_findings_with_context
 
-This powerful tool retrieves ALL findings from ALL audits in a single request, including:
+This is the **most powerful tool** for cross-audit analysis. It retrieves ALL findings from ALL audits in a single request with **comprehensive automatic processing**:
 
-- Finding details (title, description, severity, CVSS)
-- Parent audit information (name, client, company, dates)
-- Team members and scope
-- CWE references
+**Automatic Enhancements:**
+- ✅ **CWE Extraction** - Automatically finds CWE from customFields
+- ✅ **OWASP Extraction** - Extracts OWASP categories from multiple sources
+- ✅ **HTML Stripping** - Removes HTML tags from descriptions, observations, remediation
+- ✅ **Full Team Info** - Creator + collaborators with roles
+- ✅ **Complete Scope URLs** - All audit scope URLs
+- ✅ **Enhanced Context** - Language, audit type, dates, client, company
 
-**Use case**: Cross-audit analysis, vulnerability trending, compliance reporting.
+**Use cases:**
+- CWE/OWASP analysis: "Show me all CWE-79 findings across clients"
+- Vulnerability trending: Track common issues over time
+- Compliance reporting: Generate cross-audit statistics with OWASP mapping
+- Team metrics: Analyze findings by team member
+- Revalidation tracking: Find all findings marked for revalidation
 
+**Example:**
 ```
-"What are the most common vulnerabilities across all our pentests this year?"
+"What are the most common CWE classifications across all our pentests this year?"
+"Show me all OWASP Top 10 findings with their remediation status"
 ```
 
 ### search_findings

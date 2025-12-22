@@ -219,61 +219,123 @@ Search for findings across all audits.
 
 ## get_all_findings_with_context
 
-Get ALL findings from ALL audits with complete context in a single request.
+Get ALL findings from ALL audits with **comprehensive context and enhanced processing** in a single request.
+
+### What Makes This Tool Special
+
+This is the **most powerful tool** for cross-audit analysis. It automatically:
+
+✅ **Extracts CWE** from customFields (searches for "CWE", "CWE-ID", "CWE ID" labels)
+✅ **Extracts OWASP** category from finding categories and customFields
+✅ **Strips HTML tags** from descriptions, observations, and remediation
+✅ **Builds full team** with creator + collaborators (including roles)
+✅ **Includes complete scope URLs** from audit scope
+✅ **Provides enhanced audit context** (language, audit type, dates)
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `include_failed` | boolean | No | Include 'Failed' category findings (default: false) |
-| `exclude_categories` | array | No | Categories to exclude |
+| `exclude_categories` | array | No | Categories to exclude from results |
 
 ### Examples
 
 > "Give me a complete analysis of all vulnerabilities across all pentests"
 
-> "What are the most common vulnerability types this year?"
+> "What are the most common CWE classifications this year?"
 
-> "Show me trending vulnerabilities across clients"
+> "Show me all OWASP Top 10 findings with their teams"
+
+> "Which vulnerabilities are being revalidated across clients?"
 
 ### Response
 
 ```json
 [
   {
-    "finding": {
-      "_id": "...",
-      "title": "SQL Injection",
-      "severity": "Critical",
-      "cvssv3": "...",
-      "description": "...",
-      "remediation": "..."
-    },
+    "_id": "finding_id",
+    "title": "SQL Injection in Login",
+    "category": "OWASP A03:2021 - Injection",
+    "severity": "Critical",
+    "cvssv3": "9.8",
+    "priority": 1,
+    "status": "Confirmed",
+
+    "description": "Clean text without HTML tags",
+    "observation": "Clean text without HTML tags",
+    "remediation": "Clean text without HTML tags",
+
+    "cwe": "CWE-89",
+    "owasp": "OWASP A03:2021 - Injection",
+    "revalidation": false,
+    "references": ["https://..."],
+    "customFields": [...],
+
     "audit": {
-      "_id": "...",
-      "name": "Acme Corp Pentest Q4",
+      "_id": "audit_id",
+      "name": "Acme Corp Pentest Q4 2024",
+      "company": "Acme Corporation",
+      "client": "security@acme.com",
       "date_start": "2024-10-01",
       "date_end": "2024-10-31",
-      "scope": ["app.acme.com"],
-      "team": ["pentester1", "pentester2"]
-    },
-    "client": {
-      "name": "Acme Corporation",
-      "email": "security@acme.com"
-    },
-    "company": {
-      "name": "Acme Corp"
+      "scope": ["https://app.acme.com", "https://api.acme.com"],
+      "team": [
+        {"username": "alice", "role": "creator"},
+        {"username": "bob", "role": "collaborator"},
+        {"username": "charlie", "role": "collaborator"}
+      ],
+      "language": "en",
+      "audit_type": "Web Application Pentest"
     }
   }
 ]
 ```
 
+### Enhanced Features
+
+**CWE Extraction**
+```
+Automatically finds CWE from customFields:
+- Searches for labels: "CWE", "CWE-ID", "CWE ID"
+- Returns the value (e.g., "CWE-89", "CWE-79")
+- Returns null if not found
+```
+
+**OWASP Extraction**
+```
+Checks multiple sources:
+1. Category field (e.g., "OWASP A03:2021")
+2. CustomFields with "owasp" in label
+3. Returns first match found
+```
+
+**HTML Stripping**
+```
+Removes all HTML tags and decodes entities from:
+- description
+- observation
+- remediation
+
+Ensures clean text for AI analysis and reporting
+```
+
+**Full Team Information**
+```
+Includes complete team with roles:
+- Creator (who initiated the audit)
+- Collaborators (all team members)
+- Username for each member
+```
+
 ### Use Cases
 
+- **CWE/OWASP Analysis**: "Show me all CWE-79 findings across clients"
 - **Vulnerability trending**: Track common issues over time
 - **Client comparisons**: Compare security posture across clients
 - **Team metrics**: Analyze findings by team member
-- **Compliance reporting**: Generate cross-audit statistics
+- **Compliance reporting**: Generate cross-audit statistics with OWASP mapping
+- **Revalidation tracking**: Find all findings marked for revalidation
 
 ---
 

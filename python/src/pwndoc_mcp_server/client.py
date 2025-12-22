@@ -260,7 +260,8 @@ class PwnDocClient:
             "Accept": "application/json",
         }
         if self._token:
-            headers["Authorization"] = f"Bearer {self._token}"
+            # PwnDoc expects JWT token in Cookie header
+            headers["Cookie"] = f"token=JWT {self._token}"
         return headers
 
     def authenticate(self) -> bool:
@@ -281,7 +282,7 @@ class PwnDocClient:
         if self.config.username and self.config.password:
             try:
                 response = self._client.post(
-                    "/api/users/login",
+                    "/api/users/token",
                     json={
                         "username": self.config.username,
                         "password": self.config.password,
@@ -498,6 +499,16 @@ class PwnDocClient:
         response = self._put(f"/api/audits/{audit_id}/updateReadyForReview", json={"state": state})
         return response.get("datas", {})
 
+    def get_audit_sections(self, audit_id: str) -> Dict:
+        """Get audit sections."""
+        response = self._get(f"/api/audits/{audit_id}/sections")
+        return response.get("datas", {})
+
+    def update_audit_sections(self, audit_id: str, sections: Dict) -> Dict:
+        """Update audit sections."""
+        response = self._put(f"/api/audits/{audit_id}/sections", json=sections)
+        return response.get("datas", {})
+
     # =========================================================================
     # FINDING ENDPOINTS
     # =========================================================================
@@ -629,6 +640,16 @@ class PwnDocClient:
         response = self._post("/api/vulnerabilities/from-finding", json=kwargs)
         return response.get("datas", {})
 
+    def get_vulnerability_updates(self) -> List[Dict]:
+        """Get available vulnerability template updates."""
+        response = self._get("/api/vulnerabilities/updates")
+        return response.get("datas", [])
+
+    def merge_vulnerability(self, vuln_id: str, update_id: str) -> Dict:
+        """Merge vulnerability template with update."""
+        response = self._post(f"/api/vulnerabilities/{vuln_id}/merge/{update_id}")
+        return response.get("datas", {})
+
     # =========================================================================
     # USER ENDPOINTS
     # =========================================================================
@@ -667,6 +688,21 @@ class PwnDocClient:
         """List all reviewers."""
         response = self._get("/api/users/reviewers")
         return response.get("datas", [])
+
+    def get_totp(self) -> Dict:
+        """Get TOTP (2FA) status for current user."""
+        response = self._get("/api/users/totp")
+        return response.get("datas", {})
+
+    def setup_totp(self) -> Dict:
+        """Setup TOTP (2FA) for current user."""
+        response = self._post("/api/users/totp")
+        return response.get("datas", {})
+
+    def disable_totp(self, token: str) -> Dict:
+        """Disable TOTP (2FA) for current user."""
+        response = self._delete("/api/users/totp", json={"token": token})
+        return response.get("datas", {})
 
     # =========================================================================
     # TEMPLATE & SETTINGS ENDPOINTS
@@ -718,6 +754,16 @@ class PwnDocClient:
         response = self._put("/api/settings", json=settings)
         return response.get("datas", {})
 
+    def export_settings(self) -> Dict:
+        """Export all system settings."""
+        response = self._get("/api/settings/export")
+        return response.get("datas", {})
+
+    def import_settings(self, settings: Dict) -> Dict:
+        """Import/revert system settings."""
+        response = self._post("/api/settings/import", json=settings)
+        return response.get("datas", {})
+
     # =========================================================================
     # DATA TYPE ENDPOINTS
     # =========================================================================
@@ -756,6 +802,96 @@ class PwnDocClient:
         """List all user roles."""
         response = self._get("/api/data/roles")
         return response.get("datas", [])
+
+    def create_language(self, **kwargs) -> Dict:
+        """Create a new language."""
+        response = self._post("/api/data/languages", json=kwargs)
+        return response.get("datas", {})
+
+    def update_language(self, language_id: str, **kwargs) -> Dict:
+        """Update a language."""
+        response = self._put(f"/api/data/languages/{language_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_language(self, language_id: str) -> bool:
+        """Delete a language."""
+        self._delete(f"/api/data/languages/{language_id}")
+        return True
+
+    def create_audit_type(self, **kwargs) -> Dict:
+        """Create a new audit type."""
+        response = self._post("/api/data/audit-types", json=kwargs)
+        return response.get("datas", {})
+
+    def update_audit_type(self, audit_type_id: str, **kwargs) -> Dict:
+        """Update an audit type."""
+        response = self._put(f"/api/data/audit-types/{audit_type_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_audit_type(self, audit_type_id: str) -> bool:
+        """Delete an audit type."""
+        self._delete(f"/api/data/audit-types/{audit_type_id}")
+        return True
+
+    def create_vulnerability_type(self, **kwargs) -> Dict:
+        """Create a new vulnerability type."""
+        response = self._post("/api/data/vulnerability-types", json=kwargs)
+        return response.get("datas", {})
+
+    def update_vulnerability_type(self, vuln_type_id: str, **kwargs) -> Dict:
+        """Update a vulnerability type."""
+        response = self._put(f"/api/data/vulnerability-types/{vuln_type_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_vulnerability_type(self, vuln_type_id: str) -> bool:
+        """Delete a vulnerability type."""
+        self._delete(f"/api/data/vulnerability-types/{vuln_type_id}")
+        return True
+
+    def create_vulnerability_category(self, **kwargs) -> Dict:
+        """Create a new vulnerability category."""
+        response = self._post("/api/data/vulnerability-categories", json=kwargs)
+        return response.get("datas", {})
+
+    def update_vulnerability_category(self, category_id: str, **kwargs) -> Dict:
+        """Update a vulnerability category."""
+        response = self._put(f"/api/data/vulnerability-categories/{category_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_vulnerability_category(self, category_id: str) -> bool:
+        """Delete a vulnerability category."""
+        self._delete(f"/api/data/vulnerability-categories/{category_id}")
+        return True
+
+    def create_section(self, **kwargs) -> Dict:
+        """Create a new section definition."""
+        response = self._post("/api/data/sections", json=kwargs)
+        return response.get("datas", {})
+
+    def update_section(self, section_id: str, **kwargs) -> Dict:
+        """Update a section definition."""
+        response = self._put(f"/api/data/sections/{section_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_section(self, section_id: str) -> bool:
+        """Delete a section definition."""
+        self._delete(f"/api/data/sections/{section_id}")
+        return True
+
+    def create_custom_field(self, **kwargs) -> Dict:
+        """Create a new custom field definition."""
+        response = self._post("/api/data/custom-fields", json=kwargs)
+        return response.get("datas", {})
+
+    def update_custom_field(self, field_id: str, **kwargs) -> Dict:
+        """Update a custom field definition."""
+        response = self._put(f"/api/data/custom-fields/{field_id}", json=kwargs)
+        return response.get("datas", {})
+
+    def delete_custom_field(self, field_id: str) -> bool:
+        """Delete a custom field definition."""
+        self._delete(f"/api/data/custom-fields/{field_id}")
+        return True
 
     # =========================================================================
     # IMAGE ENDPOINTS
@@ -845,7 +981,64 @@ class PwnDocClient:
     def get_all_findings_with_context(
         self, include_failed: bool = False, exclude_categories: Optional[List[str]] = None
     ) -> List[Dict]:
-        """Get all findings with full audit context."""
+        """
+        Get all findings with full audit context.
+
+        This comprehensive method extracts:
+        - CWE from customFields
+        - OWASP category
+        - Revalidation status
+        - Strips HTML from descriptions/observations
+        - Includes full audit team (collaborators + creator)
+        - Includes complete scope URLs
+
+        Args:
+            include_failed: Include findings in 'Failed' category
+            exclude_categories: Categories to exclude from results
+
+        Returns:
+            List of findings with enhanced context
+        """
+        import re
+
+        def strip_html(text: str) -> str:
+            """Strip HTML tags from text."""
+            if not text:
+                return ""
+            # Remove HTML tags
+            clean = re.sub(r"<[^>]+>", "", text)
+            # Decode common HTML entities
+            clean = clean.replace("&nbsp;", " ")
+            clean = clean.replace("&lt;", "<")
+            clean = clean.replace("&gt;", ">")
+            clean = clean.replace("&amp;", "&")
+            clean = clean.replace("&quot;", '"')
+            return clean.strip()
+
+        def extract_cwe(custom_fields: List[Dict]) -> Optional[str]:
+            """Extract CWE from customFields."""
+            if not custom_fields:
+                return None
+            for field in custom_fields:
+                if field.get("label", "").lower() in ["cwe", "cwe-id", "cwe id"]:
+                    return field.get("text") or field.get("value")
+            return None
+
+        def extract_owasp(finding: Dict) -> Optional[str]:
+            """Extract OWASP category from finding."""
+            # Check category field
+            category = finding.get("category", "")
+            if "owasp" in category.lower():
+                return category
+
+            # Check customFields for OWASP
+            custom_fields = finding.get("customFields", [])
+            for field in custom_fields:
+                if "owasp" in field.get("label", "").lower():
+                    return field.get("text") or field.get("value")
+
+            return None
+
         exclude_categories = exclude_categories or []
         if not include_failed:
             exclude_categories.append("Failed")
@@ -858,19 +1051,72 @@ class PwnDocClient:
             findings = self.get_findings(audit["_id"])
 
             for finding in findings:
+                # Filter by category
                 if finding.get("category") in exclude_categories:
                     continue
 
-                # Add audit context
-                finding["audit"] = {
-                    "_id": audit["_id"],
-                    "name": audit.get("name"),
-                    "company": audit_detail.get("company", {}).get("name"),
-                    "client": audit_detail.get("client", {}).get("email"),
-                    "date_start": audit_detail.get("date_start"),
-                    "date_end": audit_detail.get("date_end"),
-                    "scope": audit_detail.get("scope", []),
+                # Extract enhanced metadata
+                cwe = extract_cwe(finding.get("customFields", []))
+                owasp = extract_owasp(finding)
+
+                # Build full team (creator + collaborators)
+                team = []
+                creator = audit_detail.get("creator")
+                if creator:
+                    team.append({"username": creator.get("username"), "role": "creator"})
+
+                collaborators = audit_detail.get("collaborators", [])
+                for collab in collaborators:
+                    team.append({"username": collab.get("username"), "role": "collaborator"})
+
+                # Extract scope URLs
+                scope_urls = []
+                for scope_item in audit_detail.get("scope", []):
+                    if isinstance(scope_item, dict):
+                        scope_urls.append(scope_item.get("name", ""))
+                    else:
+                        scope_urls.append(str(scope_item))
+
+                # Strip HTML from text fields
+                description = strip_html(finding.get("description", ""))
+                observation = strip_html(finding.get("observation", ""))
+                remediation = strip_html(finding.get("remediation", ""))
+
+                # Enhanced finding object
+                enhanced_finding = {
+                    # Original finding fields
+                    "_id": finding.get("_id"),
+                    "title": finding.get("title"),
+                    "category": finding.get("category"),
+                    "severity": finding.get("severity"),
+                    "cvssv3": finding.get("cvssv3"),
+                    "priority": finding.get("priority"),
+                    "status": finding.get("status"),
+                    # Cleaned text fields
+                    "description": description,
+                    "observation": observation,
+                    "remediation": remediation,
+                    # Extracted metadata
+                    "cwe": cwe,
+                    "owasp": owasp,
+                    "revalidation": finding.get("revalidation"),
+                    "references": finding.get("references", []),
+                    "customFields": finding.get("customFields", []),
+                    # Enhanced audit context
+                    "audit": {
+                        "_id": audit["_id"],
+                        "name": audit.get("name"),
+                        "company": audit_detail.get("company", {}).get("name"),
+                        "client": audit_detail.get("client", {}).get("email"),
+                        "date_start": audit_detail.get("date_start"),
+                        "date_end": audit_detail.get("date_end"),
+                        "scope": scope_urls,
+                        "team": team,
+                        "language": audit_detail.get("language"),
+                        "audit_type": audit_detail.get("auditType"),
+                    },
                 }
-                results.append(finding)
+
+                results.append(enhanced_finding)
 
         return results
