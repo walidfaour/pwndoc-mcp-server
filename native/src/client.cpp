@@ -64,7 +64,8 @@ double RateLimiter::wait_time() const {
     auto oldest = requests_.front();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - oldest).count();
 
-    return std::max(0.0, static_cast<double>(period_ - elapsed));
+    double wait = static_cast<double>(period_ - elapsed);
+    return wait > 0.0 ? wait : 0.0;
 }
 
 // ============================================================================

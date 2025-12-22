@@ -11,6 +11,11 @@ add_compile_definitions(
     PWNDOC_EMAIL="security@walidfaour.com"
 )
 
+# Windows: Prevent min/max macros from windows.h
+if(WIN32)
+    add_compile_definitions(NOMINMAX)
+endif()
+
 option(BUILD_STATIC "Build static binary" OFF)
 
 # Find dependencies
