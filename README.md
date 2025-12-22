@@ -32,22 +32,24 @@ PwnDoc MCP Server enables AI assistants to interact with your PwnDoc penetration
 
 ### Two Implementations
 
+Both implementations have **complete feature parity** - all features work identically.
+
 | Version | Best For | Size | Install |
 |---------|----------|------|---------|
 | [**Python**](#python-installation) | Most users, extensibility | ~50MB | `pip install pwndoc-mcp-server` |
-| [**Native C++**](#native-installation) | Portability, minimal deps | ~5MB | [Download binary](https://github.com/walidfaour/pwndoc-mcp-server/releases) |
+| [**Native C++**](#native-installation) | Performance, minimal deps | ~5MB | [Download binary](https://github.com/walidfaour/pwndoc-mcp-server/releases) |
 
 ## ✨ Features
 
 - 🔌 **90 MCP Tools** - Complete coverage of PwnDoc API (all endpoints)
-- 🔐 **Secure Authentication** - JWT tokens with auto-refresh
-- ⚡ **Rate Limiting** - Built-in sliding window rate limiter
-- 🔄 **Automatic Retries** - Exponential backoff for failed requests
-- 📊 **Comprehensive Logging** - Debug, file, and JSON logging
+- 🔐 **Secure Authentication** - JWT tokens with auto-refresh (both implementations)
+- ⚡ **Rate Limiting** - Built-in sliding window rate limiter (both implementations)
+- 🔄 **Automatic Retries** - Exponential backoff for failed requests (both implementations)
+- 📊 **Comprehensive Logging** - Debug, file, and JSON logging (both implementations)
 - 🌍 **Cross-Platform** - Linux, macOS, Windows support
 - 🐳 **Docker Ready** - Pre-built container images
 - 📦 **Multiple Installation Methods** - pip, apt, yum, binaries
-- 🚀 **Native Binary** - Optional C++ implementation for portability
+- 🚀 **Two Full Implementations** - Python and C++ with complete feature parity
 - 🎯 **Type Safety** - Full mypy type checking (zero errors)
 - ✅ **Well Tested** - 111 tests, 100% quality checks passing
 
@@ -78,6 +80,14 @@ pip install pwndoc-mcp-server
 ```
 
 ### Native Installation
+
+**C++ implementation with complete feature parity** - includes all Python features:
+- ✅ Rate limiting with sliding window algorithm
+- ✅ Automatic retries with exponential backoff
+- ✅ Token refresh using refresh tokens
+- ✅ Comprehensive error handling (typed exceptions)
+- ✅ Full logging support (info/warning/debug)
+- ✅ All 90 MCP tools
 
 Download pre-built binaries from [Releases](https://github.com/walidfaour/pwndoc-mcp-server/releases):
 

@@ -14,6 +14,17 @@ struct Config {
     std::optional<std::string> password;
     bool verify_ssl = true;
     int timeout = 30;
+
+    // Rate limiting
+    int rate_limit_max_requests = 100;
+    int rate_limit_period = 60;
+
+    // Logging (0 = INFO, 1 = WARNING, -1 = DEBUG)
+    int log_level = 0;
+
+    // Retry configuration
+    int max_retries = 3;
+    double retry_delay = 1.0;
     
     /**
      * Load configuration from environment and file
