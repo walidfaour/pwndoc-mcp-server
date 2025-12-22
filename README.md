@@ -88,6 +88,7 @@ pip install pwndoc-mcp-server
 - ✅ Comprehensive error handling (typed exceptions)
 - ✅ Full logging support (info/warning/debug)
 - ✅ All 90 MCP tools
+- ✅ **Complete CLI Tools** - test, tools, config init, claude-install, claude-status
 
 Download pre-built binaries from [Releases](https://github.com/walidfaour/pwndoc-mcp-server/releases):
 
