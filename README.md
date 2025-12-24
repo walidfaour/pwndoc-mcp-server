@@ -52,7 +52,7 @@ Both implementations have **complete feature parity** - all features work identi
 
 Tip: Use `pwndoc-mcp tools` to list all available tools with descriptions.
 
-[Full tool documentation →](./tools/overview/)
+[Full tool documentation →](https://walidfaour.github.io/pwndoc-mcp-server/tools/overview)
 
 
 ## 📖 Documentation
