@@ -439,7 +439,7 @@ docker run -it --rm \
 
 > 💡 **Tip:** Use `pwndoc-mcp tools` to list all available tools with descriptions
 
-[Full tool documentation →](https://walidfaour.github.io/pwndoc-mcp-server/tools)
+[Full tool documentation →](https://walidfaour.github.io/pwndoc-mcp-server/tools/overview)
 
 ## 📖 Documentation
 
