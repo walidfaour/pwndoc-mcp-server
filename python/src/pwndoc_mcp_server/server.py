@@ -1,4 +1,4 @@
-"""
+pe"""
 PwnDoc MCP Server - Model Context Protocol implementation.
 
 This module implements the MCP server that exposes PwnDoc functionality
@@ -340,9 +340,10 @@ class PwnDocMCPServer:
                     "cvssv3": {"type": "string", "description": "CVSS v3 score/vector"},
                     "priority": {"type": "integer", "description": "Priority (1-4)"},
                     "category": {"type": "string", "description": "Category"},
-                    "vuln_type": {"type": "string", "description": "Vulnerability type"},
+                    "vulnType": {"type": "string", "description": "Vulnerability type"},
                     "poc": {"type": "string", "description": "Proof of concept"},
                     "scope": {"type": "string", "description": "Affected scope"},
+                    "remediationComplexity":{"type": "integer", "description": "Remediation complexity (1-3)"},
                     "references": {
                         "type": "array",
                         "items": {"type": "string"},
@@ -386,7 +387,7 @@ class PwnDocMCPServer:
                     "cvssv3": {"type": "string"},
                     "priority": {"type": "integer"},
                     "category": {"type": "string"},
-                    "vuln_type": {"type": "string"},
+                    "vulnType": {"type": "string"},
                     "poc": {"type": "string"},
                     "scope": {"type": "string"},
                     "references": {"type": "array", "items": {"type": "string"}},
